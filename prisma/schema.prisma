@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  enrollments Enrollment[]
+  reviewedEnrollments Enrollment[] @relation("ReviewedBy")
+  taughtClasses Class[] @relation("TaughtBy")
+  createdAt DateTime @default(now())
+}
+
+model Class {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  instructor  User       @relation("TaughtBy", fields: [instructorId], references: [id])
+  instructorId String
+  schedules   Schedule[]
+  enrollments Enrollment[]
+  createdAt   DateTime   @default(now())
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId   String
+  dayOfWeek DayOfWeek
+  startTime String   // HH:MM format
+  endTime   String   // HH:MM format
+  location  String?
+  createdAt DateTime @default(now())
+}
+
+model Enrollment {
+  id             String   @id @default(cuid())
+  student        User     @relation(fields: [studentId], references: [id])
+  studentId      String
+  class          Class    @relation(fields: [classId], references: [id])
+  classId        String
+  enrollmentDate DateTime @default(now())
+  status         EnrollmentStatus @default(PENDING)
+  // Review workflow fields
+  reviewNote     String?
+  reviewedAt     DateTime?
+  reviewer       User?    @relation("ReviewedBy", fields: [reviewerId], references: [id])
+  reviewerId     String?
+  createdAt      DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  COORDINATOR
+  INSTRUCTOR
+  STUDENT
+}
+
+enum EnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
