@@ -9,9 +9,9 @@ export const metadata = {
   title: "Bellydance Project Academy",
   description: "Gestión de inscripciones y clases para Bellydance Project",
   icons: {
-    icon: "/Logo_UDO.svg",
-    shortcut: "/Logo_UDO.svg",
-    apple: "/Logo_UDO.svg",
+    icon: "/logo-bellydance-project.png",
+    shortcut: "/logo-bellydance-project.png",
+    apple: "/logo-bellydance-project.png",
   },
 };
 

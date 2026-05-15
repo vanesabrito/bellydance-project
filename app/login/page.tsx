@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import Image from "next/image";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import BackButton from "@/components/atoms/BackButton";
@@ -128,6 +129,11 @@ export default function LoginPage() {
               textTransform: "none",
               borderRadius: 3,
               boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+              backgroundColor: "#ec407a",
+              color: "#fff",
+              '&:hover': {
+                backgroundColor: "#d81b60",
+              },
             }}
           >
             {loading ? "Entrando..." : "Entrar"}

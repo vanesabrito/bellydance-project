@@ -23,6 +23,7 @@ services:
       - NEXTAUTH_SECRET=change_this_secret
       - ADMIN_EMAIL=admin@example.com
       - ADMIN_PASSWORD=adminpass
+      - PORT=3000
     ports:
       - "3000:3000"
     restart: unless-stopped

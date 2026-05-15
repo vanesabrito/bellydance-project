@@ -54,11 +54,12 @@ export default function Sidebar() {
         }}
       >
         <Image
-          src="/Logo_UDO.svg"
-          alt="Logo UDO"
-          width={140}
-          height={60}
+          src="/logo-bellydance-project.png"
+          alt="Logo Bellydance Project"
+          width={200}
+          height={200}
           priority
+          style={{ objectFit: "contain", width: "200px", height: "200px" }}
         />
       </Box>
       <List>
