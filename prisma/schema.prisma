@@ -8,14 +8,22 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      Role     @default(STUDENT)
-  enrollments Enrollment[]
+  id              String   @id @default(cuid())
+  email           String   @unique
+  password        String
+  role            Role     @default(ALUMNA)
+  nombre          String?
+  apellido        String?
+  cedula          String?
+  fechaNacimiento DateTime?
+  edad            Int?
+  direccion       String?
+  enrollments     Enrollment[]
   reviewedEnrollments Enrollment[] @relation("ReviewedBy")
-  taughtClasses Class[] @relation("TaughtBy")
-  createdAt DateTime @default(now())
+  taughtClasses   Class[] @relation("TaughtBy")
+  createdAt       DateTime @default(now())
+
+  @@unique([cedula], name: "User_cedula_key")
 }
 
 model Class {
@@ -58,9 +66,9 @@ model Enrollment {
 
 enum Role {
   ADMIN
-  COORDINATOR
-  INSTRUCTOR
-  STUDENT
+  DIRECTORA_ACADEMICA
+  PROFESORA
+  ALUMNA
 }
 
 enum EnrollmentStatus {

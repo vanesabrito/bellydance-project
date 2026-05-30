@@ -22,7 +22,7 @@ type RecentEnrollment = {
 type Stats = {
   totalUsers: number;
   totalAdmins: number;
-  totalStudents: number;
+  totalAlumnas: number;
   totalEnrollments: number;
   pending: number;
   approved: number;
@@ -110,7 +110,7 @@ export default function AdminReportsDashboard() {
             <Card label="Administradores" value={stats.totalAdmins} />
           </Grid>
           <Grid xs={12} md={3}>
-            <Card label="Estudiantes" value={stats.totalStudents} />
+            <Card label="Alumnas" value={stats.totalAlumnas} />
           </Grid>
           <Grid xs={12} md={3}>
             <Card label="Inscripciones" value={stats.totalEnrollments} />

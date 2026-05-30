@@ -19,6 +19,12 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
+import SchoolIcon from "@mui/icons-material/School";
+import EventIcon from "@mui/icons-material/Event";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import CheckroomIcon from "@mui/icons-material/Checkroom";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 export default function Sidebar() {
   const { data: session } = useSession();
@@ -81,8 +87,8 @@ export default function Sidebar() {
           </ListItem>
         )}
 
-        {/* Student links */}
-        {role === "STUDENT" && (
+        {/* Alumna links */}
+        {role === "ALUMNA" && (
           <>
             <ListItem disablePadding>
               <ListItemButton
@@ -115,8 +121,90 @@ export default function Sidebar() {
           </>
         )}
 
-        {/* Coordinator/Admin / Coordinator links */}
-        {(role === "ADMIN" || role === "COORDINATOR") && (
+        {/* Profesora links */}
+        {role === "PROFESORA" && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/classes"
+                selected={isSelected("/profesora/classes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Mis Clases" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/choreographies"
+                selected={isSelected("/profesora/choreographies")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <MusicNoteIcon />
+                </ListItemIcon>
+                <ListItemText primary="Coreografías" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/costumes"
+                selected={isSelected("/profesora/costumes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <CheckroomIcon />
+                </ListItemIcon>
+                <ListItemText primary="Vestuarios" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {/* Directora Académica links */}
+        {role === "DIRECTORA_ACADEMICA" && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/events"
+                selected={isSelected("/directora/events")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <EventIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Eventos" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/attendance"
+                selected={isSelected("/directora/attendance")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <FactCheckIcon />
+                </ListItemIcon>
+                <ListItemText primary="Control de Asistencias" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {/* Admin links */}
+        {role === "ADMIN" && (
           <>
             <ListItem disablePadding>
               <ListItemButton
@@ -129,7 +217,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary="Usuarios" />
+                <ListItemText primary="Registrar Usuarios" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -143,7 +231,35 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <FactCheckIcon />
                 </ListItemIcon>
-                <ListItemText primary="Revisar inscripciones" />
+                <ListItemText primary="Gestionar Inscripciones" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/documents"
+                selected={isSelected("/admin/documents")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <DescriptionIcon />
+                </ListItemIcon>
+                <ListItemText primary="Documentos" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/payments"
+                selected={isSelected("/admin/payments")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <AttachMoneyIcon />
+                </ListItemIcon>
+                <ListItemText primary="Control de Pagos" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

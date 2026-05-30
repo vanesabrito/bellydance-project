@@ -19,7 +19,7 @@ import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 type AdminUser = {
   id: string;
   email: string;
-  role: "ADMIN" | "COORDINATOR" | "INSTRUCTOR" | "STUDENT";
+  role: "ADMIN" | "DIRECTORA_ACADEMICA" | "PROFESORA" | "ALUMNA";
   createdAt: string;
 };
 
