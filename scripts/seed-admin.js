@@ -45,8 +45,8 @@ async function run() {
           email: directoraEmail, 
           password: hash, 
           role: "DIRECTORA_ACADEMICA",
-          nombre: "María",
-          apellido: "García",
+          nombre: "Directora",
+          apellido: "Académica",
           cedula: "12345678",
           fechaNacimiento: new Date("1985-05-15"),
           edad: 39
@@ -55,26 +55,36 @@ async function run() {
       console.log(`Created directora académica user: ${directoraEmail}`);
     }
 
-    // Crear profesora
-    const profesoraEmail = "profesora@bellydance.com";
-    let profesora = await prisma.user.findUnique({
-      where: { email: profesoraEmail },
-    });
-    if (!profesora) {
-      const hash = await bcrypt.hash("profesorapass", 10);
-      profesora = await prisma.user.create({
-        data: { 
-          email: profesoraEmail, 
-          password: hash, 
-          role: "PROFESORA",
-          nombre: "Ana",
-          apellido: "López",
-          cedula: "87654321",
-          fechaNacimiento: new Date("1990-03-20"),
-          edad: 34
-        },
+    // Crear profesoras: Mariana, Veronica, Isabella
+    const profesoras = [
+      { nombre: "Mariana", apellido: "Rodríguez", email: "mariana@bellydance.com", cedula: "10000001" },
+      { nombre: "Veronica", apellido: "Sánchez", email: "veronica@bellydance.com", cedula: "10000002" },
+      { nombre: "Isabella", apellido: "Martínez", email: "isabella@bellydance.com", cedula: "10000003" }
+    ];
+
+    let profesora = null;
+    for (const p of profesoras) {
+      const existingProfesora = await prisma.user.findUnique({
+        where: { email: p.email },
       });
-      console.log(`Created profesora user: ${profesoraEmail}`);
+      if (!existingProfesora) {
+        const hash = await bcrypt.hash("profesorapass", 10);
+        profesora = await prisma.user.create({
+          data: { 
+            email: p.email, 
+            password: hash, 
+            role: "PROFESORA",
+            nombre: p.nombre,
+            apellido: p.apellido,
+            cedula: p.cedula,
+            fechaNacimiento: new Date("1990-03-20"),
+            edad: 34
+          },
+        });
+        console.log(`Created profesora user: ${p.email}`);
+      } else {
+        profesora = existingProfesora;
+      }
     }
 
     // Crear clase de ejemplo
