@@ -2,128 +2,490 @@
 
 Aplicación en **Next.js 14 (App Router)** + **TypeScript** para gestionar **inscripciones y clases** en la academia de baile Bellydance Project, lista para correr con **Docker + PostgreSQL**.
 
-## Qué hace la aplicación
+## Descripción del Sistema
 
-### Roles
+El sistema de gestión de la academia de baile Bellydance Project es una aplicación web completa que permite administrar usuarios, clases, inscripciones, documentos y pagos. El sistema está diseñado para trabajar con cuatro roles principales: Administrador, Directora Académica, Profesora y Alumna.
 
-- **Estudiante**
-  - Se registra con email y contraseña.
-  - Inicia sesión.
-  - Ve clases disponibles y se inscribe desde la página **Inscribirse**.
-  - Ve el estado de sus inscripciones en la página **Mis Inscripciones**:
-    - Pendiente / Aprobada / Rechazada.
-    - Nota de revisión (observaciones del coordinador).
-    - Fecha de última revisión.
+## Roles del Sistema
 
-- **Instructor**
-  - Gestiona sus clases asignadas.
-  - Ve estudiantes inscritos en sus clases.
+### 1. Administrador (ADMIN)
+El administrador tiene control total del sistema y puede realizar todas las operaciones:
 
-- **Coordinador**
-  - Revisa y aprueba inscripciones de estudiantes.
-  - Gestiona clases y horarios.
-  - Accede a reportes de inscripciones.
+**Funcionalidades:**
+- **Gestión de Usuarios**: Registrar nuevos usuarios, ver lista de usuarios registrados, asignar roles (Administrador, Directora Académica, Profesora, Alumna)
+- **Gestión de Inscripciones**: Ver todas las inscripciones, aprobar/rechazar inscripciones, agregar notas de revisión
+- **Gestión de Documentos**: Recepción de documentos, entrega de documentos, control de estados
+- **Control de Pagos**: Ver pagos realizados, registrar nuevos pagos, generar reportes de pagos
+- **Reportes**: Acceder a estadísticas del sistema, exportar reportes CSV, ver métricas de usuarios e inscripciones
 
-- **Administrador** (usuario creado automáticamente al levantar con Docker)
-  - Control total del sistema.
-  - Gestiona usuarios, clases y reportes.
+**Credenciales por defecto:**
+- Email: `admin@example.com`
+- Password: `adminpass`
 
-### Flujo general
+### 2. Directora Académica (DIRECTORA_ACADEMICA)
+La directora académica gestiona los aspectos académicos y logísticos de la academia:
 
-1. Un admin ya existe al levantar el sistema (seed).
-2. Estudiantes se registran en `/register` y luego hacen login en `/login`.
-3. El estudiante ve clases disponibles y se inscribe desde `/student/submit`.
-4. El coordinador revisa en `/admin/review`, cambia el estado y escribe notas.
-5. El estudiante ve los cambios en `/student/recepcion`.
-6. El admin/coordinador puede consultar estadísticas desde `/admin/reports`.
+**Funcionalidades:**
+- **Gestión de Eventos**: Crear y administrar eventos académicos (presentaciones, recitales, talleres especiales)
+- **Control de Asistencias**: Registrar y controlar la asistencia de las alumnas a las clases
+- **Revisión de Inscripciones**: Aprobar/rechazar inscripciones de alumnas
+- **Reportes Académicos**: Ver estadísticas de inscripciones y asistencia
 
-## Vistas
+**Credenciales por defecto:**
+- Email: `directora@bellydance.com`
+- Password: `directorapass`
 
-Esta sección describe cómo se ve la aplicación.
+### 3. Profesora (PROFESORA)
+Las profesoras son responsables de la enseñanza y gestión de sus clases:
 
-- **Pantalla de login**
-  - Formulario con campos de email y contraseña.
-  - Botón para iniciar sesión y enlace para registrarse.
+**Funcionalidades:**
+- **Gestión de Clases**: Ver y gestionar las clases asignadas, ver lista de alumnas inscritas
+- **Creación de Coreografías**: Diseñar y gestionar coreografías para presentaciones
+- **Diseño de Vestuarios**: Crear y gestionar diseños de vestuarios para las coreografías
 
-- **Dashboard de estudiante**
-  - Sidebar a la izquierda con enlaces a "Inscribirse" y "Mis Inscripciones".
-  - En la zona central, tarjetas con resumen (por ejemplo: clases inscritas, pendientes, aprobadas).
+**Profesoras actuales:**
+- Mariana Rodríguez (`mariana@bellydance.com`) - Password: `profesorapass`
+- Veronica Sánchez (`veronica@bellydance.com`) - Password: `profesorapass`
+- Isabella Martínez (`isabella@bellydance.com`) - Password: `profesorapass`
 
-- **Entrega de documento**
+### 4. Alumna (ALUMNA)
+Las alumnas son las estudiantes que participan en las clases de la academia:
 
-  - Formulario con selector de archivo (PDF)
+**Funcionalidades:**
+- **Registro**: Registrarse en el sistema con datos personales (nombre, apellido, cédula, fecha de nacimiento, edad, dirección, email, contraseña)
+- **Inscripción a Clases**: Ver clases disponibles y solicitar inscripción
+- **Mis Inscripciones**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada)
+- **Documentos**: Subir documentos requeridos, ver estado de documentos entregados
 
-- **Recepción de documentos (estudiante)**
+**Datos de registro requeridos:**
+- Nombre
+- Apellido
+- Número de Cédula (único)
+- Correo electrónico (único)
+- Fecha de Nacimiento
+- Edad
+- Dirección
+- Contraseña
 
-  - Tabla con columnas: Documento, Estado, Nota, Fecha de revisión.
-  - Chips de colores para cada estado.
+## Flujo General del Sistema
 
-- **Panel de revisión (admin)**
+1. **Inicialización**: Al levantar el sistema, se crea automáticamente el usuario administrador y los usuarios base (directora académica y profesoras)
+2. **Registro de Alumnas**: Las alumnas se registran en `/register` con todos sus datos personales
+3. **Autenticación**: Usuarios inician sesión en `/login` con sus credenciales
+4. **Inscripción a Clases**: Las alumnas ven clases disponibles y solicitan inscripción desde `/student/enroll`
+5. **Revisión de Inscripciones**: La directora académica o administrador revisa las inscripciones y las aprueba/rechaza
+6. **Gestión Académica**: Las profesoras gestionan sus clases, coreografías y vestuarios
+7. **Control de Asistencia**: La directora académica registra y controla la asistencia
+8. **Gestión de Documentos**: Las alumnas suben documentos, el administrador los revisa
+9. **Control de Pagos**: El administrador gestiona los pagos de las alumnas
+10. **Reportes**: El administrador y directora académica acceden a estadísticas y reportes
 
-  - Tabla con todos los documentos entregados.
-  - Filtros por alumno, fecha y estado.
-  - Botones para aprobar/rechazar y campo para escribir una nota de revisión.
+## Vistas del Sistema
 
-- **Dashboard de reportes (admin)**
-  - Tarjetas con métricas (usuarios, admins, estudiantes, documentos, pendientes, aprobados, rechazados).
-  - Tabla de últimos documentos y botón "Exportar CSV".
+Esta sección describe las vistas principales de la aplicación según el rol del usuario.
+
+### Vistas Generales
+
+- **Pantalla de Login** (`/login`)
+  - Formulario con campos de email y contraseña
+  - Botón para iniciar sesión y enlace para registrarse
+  - Redirección automática al dashboard según el rol del usuario
+
+- **Página de Registro** (`/register`)
+  - Formulario completo para alumnas con campos: nombre, apellido, cédula, email, fecha de nacimiento, edad, dirección, contraseña
+  - Validación de campos obligatorios
+  - Verificación de email y cédula únicos
+
+### Vistas por Rol
+
+#### Vistas de Alumna
+
+- **Dashboard de Alumna** (`/dashboard`)
+  - Sidebar con enlaces a "Inscribirse" y "Mis Inscripciones"
+  - Tarjetas con resumen (clases inscritas, pendientes, aprobadas)
+
+- **Inscripción a Clases** (`/student/enroll`)
+  - Lista de clases disponibles con descripción
+  - Horarios y profesoras asignadas
+  - Formulario para solicitar inscripción
+
+- **Mis Inscripciones** (`/student/enrollments`)
+  - Tabla con inscripciones de la alumna
+  - Estados: Pendiente, Aprobada, Rechazada
+  - Notas de revisión y fecha de última revisión
+  - Chips de colores para cada estado
+
+#### Vistas de Profesora
+
+- **Gestión de Clases** (`/profesora/classes`)
+  - Lista de clases asignadas a la profesora
+  - Detalles de cada clase (nombre, descripción, horario)
+  - Lista de alumnas inscritas en cada clase
+  - Información de asistencia
+
+- **Gestión de Coreografías** (`/profesora/choreographies`)
+  - Lista de coreografías creadas
+  - Formulario para crear nuevas coreografías
+  - Asignación de coreografías a clases
+  - Detalles de cada coreografía
+
+- **Gestión de Vestuarios** (`/profesora/costumes`)
+  - Lista de diseños de vestuarios
+  - Formulario para crear nuevos diseños
+  - Asignación de vestuarios a coreografías
+  - Detalles de cada vestuario
+
+#### Vistas de Directora Académica
+
+- **Gestión de Eventos** (`/directora/events`)
+  - Lista de eventos académicos (presentaciones, recitales, talleres)
+  - Formulario para crear nuevos eventos
+  - Detalles de cada evento (fecha, lugar, participantes)
+  - Estado de los eventos
+
+- **Control de Asistencias** (`/directora/attendance`)
+  - Registro de asistencia por clase
+  - Estadísticas de asistencia
+  - Reportes de ausencias
+  - Filtros por fecha y clase
+
+#### Vistas de Administrador
+
+- **Gestión de Usuarios** (`/admin/users`)
+  - Tabla con todos los usuarios del sistema
+  - Botón "Registrar Usuario" para crear nuevos usuarios
+  - Formulario con todos los campos y selector de rol
+  - Información de email, rol y fecha de alta
+
+- **Gestión de Inscripciones** (`/admin/enrollments`)
+  - Tabla con todas las inscripciones del sistema
+  - Filtros por estado, fecha y alumna
+  - Botones para aprobar/rechazar inscripciones
+  - Campo para notas de revisión
+
+- **Gestión de Documentos** (`/admin/documents`)
+  - Recepción de documentos subidos por alumnas
+  - Control de estados de documentos
+  - Entrega de documentos a alumnas
+  - Historial de documentos
+
+- **Control de Pagos** (`/admin/payments`)
+  - Registro de pagos realizados
+  - Formulario para registrar nuevos pagos
+  - Historial de pagos por alumna
+  - Reportes de pagos pendientes
+
+- **Dashboard de Reportes** (`/admin/reports`)
+  - Tarjetas con métricas (usuarios, alumnas, inscripciones, pagos)
+  - Tabla de inscripciones recientes
+  - Botón "Exportar CSV" para reportes
+  - Estadísticas detalladas del sistema
 
 ## Tecnologías principales
 
-- **Next.js 14 (App Router) + React 18 + TypeScript**.
-- **NextAuth** con **Credentials provider** para login por email/contraseña.
-- **PostgreSQL** vía `pg` y **Prisma ORM**.
-- **Dockerfile** y **docker-compose** para levantar **db + web**.
-- Seed script que crea un usuario administrador (credenciales via variables de entorno).
+- **Next.js 14 (App Router) + React 18 + TypeScript**
+- **NextAuth** con **Credentials provider** para login por email/contraseña
+- **PostgreSQL** vía `pg` y **Prisma ORM**
+- **Dockerfile** y **docker-compose** para levantar **db + web**
+- Seed script que crea usuarios base (administrador, directora académica, profesoras)
 - Estructura de componentes siguiendo **Atomic Design**:
-  - `atoms` → componentes muy pequeños (botones, inputs, etc.).
-  - `molecules` → combinaciones simples de átomos.
-  - `organisms` → bloques más grandes de UI (layouts, secciones de página).
+  - `atoms` → componentes muy pequeños (botones, inputs, etc.)
+  - `molecules` → combinaciones simples de átomos
+  - `organisms` → bloques más grandes de UI (layouts, secciones de página)
 
-## Diagramas de flujo (lógica principal)
+## Diagrama de Dominio del Sistema
 
-### Flujo de registro y autenticación
+El diagrama de dominio muestra las entidades principales del sistema y sus relaciones:
+
+```mermaid
+erDiagram
+    User ||--o{ Enrollment : "solicita"
+    User ||--o{ Enrollment : "revisa"
+    User ||--o{ Class : "imparte"
+    Class ||--o{ Enrollment : "tiene"
+    Class ||--o{ Schedule : "tiene"
+    User {
+        string id PK
+        string email UK
+        string password
+        Role role
+        string nombre
+        string apellido
+        string cedula UK
+        DateTime fechaNacimiento
+        int edad
+        string direccion
+        DateTime createdAt
+    }
+    Class {
+        string id PK
+        string name
+        string description
+        string instructorId FK
+        DateTime createdAt
+    }
+    Schedule {
+        string id PK
+        string classId FK
+        DayOfWeek dayOfWeek
+        string startTime
+        string endTime
+        string location
+        DateTime createdAt
+    }
+    Enrollment {
+        string id PK
+        string studentId FK
+        string classId FK
+        DateTime enrollmentDate
+        EnrollmentStatus status
+        string reviewNote
+        DateTime reviewedAt
+        string reviewerId FK
+        DateTime createdAt
+    }
+    Role {
+        ADMIN
+        DIRECTORA_ACADEMICA
+        PROFESORA
+        ALUMNA
+    }
+    EnrollmentStatus {
+        PENDING
+        APPROVED
+        REJECTED
+    }
+    DayOfWeek {
+        MONDAY
+        TUESDAY
+        WEDNESDAY
+        THURSDAY
+        FRIDAY
+        SATURDAY
+        SUNDAY
+    }
+```
+
+## Diagramas de Casos de Uso
+
+### Casos de Uso por Rol
+
+#### Casos de Uso del Administrador
+
+```mermaid
+graph TD
+    Admin[Administrador]
+    CU1[Gestionar Usuarios]
+    CU2[Gestionar Inscripciones]
+    CU3[Gestionar Documentos]
+    CU4[Controlar Pagos]
+    CU5[Generar Reportes]
+    CU6[Ver Estadísticas]
+    
+    Admin --> CU1
+    Admin --> CU2
+    Admin --> CU3
+    Admin --> CU4
+    Admin --> CU5
+    Admin --> CU6
+    
+    CU1 --> CU1_1[Registrar Nuevo Usuario]
+    CU1 --> CU1_2[Ver Lista de Usuarios]
+    CU1 --> CU1_3[Asignar Rol]
+    
+    CU2 --> CU2_1[Ver Inscripciones]
+    CU2 --> CU2_2[Aprobar Inscripción]
+    CU2 --> CU2_3[Rechazar Inscripción]
+    CU2 --> CU2_4[Agregar Nota de Revisión]
+    
+    CU3 --> CU3_1[Recibir Documentos]
+    CU3 --> CU3_2[Revisar Documentos]
+    CU3 --> CU3_3[Entregar Documentos]
+    
+    CU4 --> CU4_1[Registrar Pagos]
+    CU4 --> CU4_2[Ver Historial de Pagos]
+    CU4 --> CU4_3[Generar Reporte de Pagos]
+    
+    CU5 --> CU5_1[Exportar CSV]
+    CU5 --> CU5_2[Ver Reportes Detallados]
+    
+    CU6 --> CU6_1[Ver Métricas de Usuarios]
+    CU6 --> CU6_2[Ver Métricas de Inscripciones]
+    CU6 --> CU6_3[Ver Métricas de Pagos]
+```
+
+#### Casos de Uso de la Directora Académica
+
+```mermaid
+graph TD
+    Directora[Directora Académica]
+    CU1[Gestionar Eventos]
+    CU2[Controlar Asistencias]
+    CU3[Revisar Inscripciones]
+    CU4[Ver Reportes Académicos]
+    
+    Directora --> CU1
+    Directora --> CU2
+    Directora --> CU3
+    Directora --> CU4
+    
+    CU1 --> CU1_1[Crear Evento]
+    CU1 --> CU1_2[Ver Lista de Eventos]
+    CU1 --> CU1_3[Actualizar Evento]
+    CU1 --> CU1_4[Eliminar Evento]
+    
+    CU2 --> CU2_1[Registrar Asistencia]
+    CU2 --> CU2_2[Ver Estadísticas de Asistencia]
+    CU2 --> CU2_3[Ver Reporte de Ausencias]
+    CU2 --> CU2_4[Filtrar por Fecha y Clase]
+    
+    CU3 --> CU3_1[Ver Inscripciones Pendientes]
+    CU3 --> CU3_2[Aprobar Inscripción]
+    CU3 --> CU3_3[Rechazar Inscripción]
+    CU3 --> CU3_4[Agregar Nota de Revisión]
+    
+    CU4 --> CU4_1[Ver Estadísticas de Inscripciones]
+    CU4 --> CU4_2[Ver Estadísticas de Asistencia]
+    CU4 --> CU4_3[Exportar Reportes]
+```
+
+#### Casos de Uso de la Profesora
+
+```mermaid
+graph TD
+    Profesora[Profesora]
+    CU1[Gestionar Clases]
+    CU2[Gestionar Coreografías]
+    CU3[Gestionar Vestuarios]
+    
+    Profesora --> CU1
+    Profesora --> CU2
+    Profesora --> CU3
+    
+    CU1 --> CU1_1[Ver Clases Asignadas]
+    CU1 --> CU1_2[Ver Detalles de Clase]
+    CU1 --> CU1_3[Ver Alumnas Inscritas]
+    CU1 --> CU1_4[Ver Información de Asistencia]
+    
+    CU2 --> CU2_1[Crear Coreografía]
+    CU2 --> CU2_2[Ver Lista de Coreografías]
+    CU2 --> CU2_3[Asignar a Clase]
+    CU2 --> CU2_4[Ver Detalles de Coreografía]
+    
+    CU3 --> CU3_1[Crear Diseño de Vestuario]
+    CU3 --> CU3_2[Ver Lista de Vestuarios]
+    CU3 --> CU3_3[Asignar a Coreografía]
+    CU3 --> CU3_4[Ver Detalles de Vestuario]
+```
+
+#### Casos de Uso de la Alumna
+
+```mermaid
+graph TD
+    Alumna[Alumna]
+    CU1[Registrarse en el Sistema]
+    CU2[Iniciar Sesión]
+    CU3[Inscribirse a Clases]
+    CU4[Ver Mis Inscripciones]
+    CU5[Subir Documentos]
+    CU6[Ver Estado de Documentos]
+    
+    Alumna --> CU1
+    Alumna --> CU2
+    Alumna --> CU3
+    Alumna --> CU4
+    Alumna --> CU5
+    Alumna --> CU6
+    
+    CU1 --> CU1_1[Completar Formulario de Registro]
+    CU1 --> CU1_2[Ingresar Datos Personales]
+    CU1 --> CU1_3[Crear Cuenta]
+    
+    CU2 --> CU2_1[Ingresar Email y Contraseña]
+    CU2 --> CU2_2[Acceder al Dashboard]
+    
+    CU3 --> CU3_1[Ver Clases Disponibles]
+    CU3 --> CU3_2[Seleccionar Clase]
+    CU3 --> CU3_3[Solicitar Inscripción]
+    CU3 --> CU3_4[Ver Estado de Solicitud]
+    
+    CU4 --> CU4_1[Ver Lista de Inscripciones]
+    CU4 --> CU4_2[Ver Estado Pendiente]
+    CU4 --> CU4_3[Ver Estado Aprobado]
+    CU4 --> CU4_4[Ver Estado Rechazado]
+    CU4 --> CU4_5[Ver Notas de Revisión]
+    
+    CU5 --> CU5_1[Seleccionar Documento]
+    CU5 --> CU5_2[Subir Archivo PDF]
+    CU5 --> CU5_3[Confirmar Envío]
+    
+    CU6 --> CU6_1[Ver Documentos Enviados]
+    CU6 --> CU6_2[Ver Estado Pendiente]
+    CU6 --> CU6_3[Ver Estado Aprobado]
+    CU6 --> CU6_4[Ver Estado Rechazado]
+```
+
+## Diagramas de Flujo (Lógica Principal)
+
+### Flujo de Registro y Autenticación
 
 ```mermaid
 flowchart TD
   A[Inicio] --> B[Usuario abre /register]
-  B --> C[Completa formulario de registro]
-  C --> D[Backend valida datos]
-  D -->|OK| E[Crear usuario en DB]
+  B --> C[Completa formulario de registro con datos personales]
+  C --> D[Backend valida datos y verifica email/cédula únicos]
+  D -->|OK| E[Crear usuario en DB con rol ALUMNA]
   D -->|Error| B
   E --> F[Redirigir a /login]
   F --> G[Usuario ingresa credenciales]
   G --> H[NextAuth valida y crea sesión]
-  H --> I[Redirigir a dashboard]
+  H --> I[Redirigir a dashboard según rol]
 ```
 
-### Flujo de entrega y revisión de documentos
+### Flujo de Inscripción a Clases
 
 ```mermaid
 flowchart TD
-  A[Estudiante autenticado] --> B[Abre /student/submit]
-  B --> C[Sube PDF y envía formulario]
-  C --> D[API /api/documents/submit guarda archivo y registro]
-  D --> E[Estado = PENDING]
-  E --> F[Admin autenticado abre /admin/review]
-  F --> G[Admin revisa documento]
-  G --> H{Aprueba o rechaza?}
-  H -->|Aprueba| I[API PATCH /api/documents/:id status=RECEIVED]
-  H -->|Rechaza| J[API PATCH /api/documents/:id status=REJECTED]
-  I --> K[Estudiante ve estado Aprobado en /student/recepcion]
-  J --> L[Estudiante ve estado Rechazado y nota]
+  A[Alumna autenticada] --> B[Abre /student/enroll]
+  B --> C[Ve lista de clases disponibles]
+  C --> D[Selecciona clase y solicita inscripción]
+  D --> E[API /api/enrollments/submit crea inscripción]
+  E --> F[Estado = PENDING]
+  F --> G[Directora Académica o Admin abre /admin/enrollments]
+  G --> H[Revisa inscripción]
+  H --> I{Aprueba o rechaza?}
+  I -->|Aprueba| J[API PATCH /api/enrollments/:id status=APPROVED]
+  I -->|Rechaza| K[API PATCH /api/enrollments/:id status=REJECTED]
+  J --> L[Alumna ve estado Aprobado en /student/enrollments]
+  K --> M[Alumna ve estado Rechazado y nota]
 ```
 
-### Flujo de generación de reportes
+### Flujo de Gestión de Usuarios por Administrador
 
 ```mermaid
 flowchart TD
-  A[Admin en /admin/reports] --> B[Front hace fetch a /api/reports/summary]
+  A[Admin autenticado] --> B[Abre /admin/users]
+  B --> C[Ve lista de usuarios del sistema]
+  C --> D[Hace clic en Registrar Usuario]
+  D --> E[Abre diálogo con formulario completo]
+  E --> F[Completa datos y selecciona rol]
+  F --> G[API POST /api/users crea usuario]
+  G --> H{Usuario creado exitosamente?}
+  H -->|Sí| I[Tabla se actualiza automáticamente]
+  H -->|No| J[Muestra error en el formulario]
+  I --> K[Admin puede registrar otro usuario]
+```
+
+### Flujo de Generación de Reportes
+
+```mermaid
+flowchart TD
+  A[Admin o Directora en /admin/reports] --> B[Front hace fetch a /api/reports/summary]
   B --> C[Backend calcula métricas con Prisma]
   C --> D[Se muestran tarjetas y tabla de recientes]
-  A --> E[Admin pulsa Exportar CSV]
-  E --> F[GET /api/reports/documents]
-  F --> G[Backend genera reporte_documentos.csv]
+  A --> E[Usuario pulsa Exportar CSV]
+  E --> F[GET /api/reports/enrollments]
+  F --> G[Backend genera reporte_inscripciones.csv]
   G --> H[Descarga del archivo CSV]
 ```
 
@@ -170,14 +532,24 @@ Una vez todo está arriba, la aplicación queda disponible en:
 
 - http://localhost:3000
 
-### 3. Credenciales por defecto del admin
+### 3. Credenciales por defecto
 
-Tomadas de `docker-compose.yml`:
+Los usuarios base se crean automáticamente al levantar el sistema:
 
+**Administrador:**
 - **Email**: `admin@example.com`
 - **Password**: `adminpass`
 
-Puedes cambiarlos editando las variables `ADMIN_EMAIL` y `ADMIN_PASSWORD` y reconstruyendo la imagen (`docker compose up --build`).
+**Directora Académica:**
+- **Email**: `directora@bellydance.com`
+- **Password**: `directorapass`
+
+**Profesoras:**
+- Mariana Rodríguez: `mariana@bellydance.com` - Password: `profesorapass`
+- Veronica Sánchez: `veronica@bellydance.com` - Password: `profesorapass`
+- Isabella Martínez: `isabella@bellydance.com` - Password: `profesorapass`
+
+Puedes cambiar las credenciales del administrador editando las variables `ADMIN_EMAIL` y `ADMIN_PASSWORD` en `docker-compose.yml` y reconstruyendo la imagen (`docker compose up --build`). Para cambiar las credenciales de otros usuarios, edita el script `scripts/seed-admin.js`.
 
 ### 4. Volúmenes y archivos subidos
 
@@ -264,50 +636,86 @@ yarn dev
 
 La app quedará disponible en http://localhost:3000.
 
-## Estructura del proyecto (resumen)
+## Estructura del Proyecto
 
-Las rutas usan el **App Router** de Next.js (`app/`). Algunas carpetas clave:
+Las rutas usan el **App Router** de Next.js (`app/`). Estructura principal:
 
-- `app/`
+### Directorio `app/`
 
-  - `page.tsx`: página de inicio (landing) con CTA para login/registro.
-  - `login/page.tsx`: formulario de inicio de sesión.
-  - `register/page.tsx`: alta de estudiante.
-  - `dashboard/page.tsx`: dashboard simple post-login.
-  - `student/submit/page.tsx`: formulario para subir PDFs.
-  - `student/recepcion/page.tsx`: tabla con documentos del estudiante.
-  - `admin/users/page.tsx`: lista de usuarios (solo admin).
-  - `admin/review/page.tsx`: revisión de documentos (solo admin).
-  - `admin/reports/page.tsx`: tablero de reportes + export CSV (solo admin).
+- `page.tsx`: página de inicio (landing) con CTA para login/registro
+- `layout.tsx`: layout principal de la aplicación
+- `login/page.tsx`: formulario de inicio de sesión
+- `register/page.tsx`: alta de alumna con datos personales completos
+- `dashboard/page.tsx`: dashboard simple post-login según rol
 
-- `app/api/`
+#### Vistas por Rol
 
-  - `auth/[...nextauth]/route.ts`: configuración de NextAuth.
-  - `auth/register/route.ts`: registro de usuario (POST).
-  - `documents/submit/route.ts`: subida de PDFs (POST).
-  - `documents/my/route.ts`: documentos del estudiante autenticado (GET).
-  - `documents/all/route.ts`: documentos para el admin (GET).
-  - `documents/[id]/route.ts`: actualización de estado del documento (PATCH).
-  - `documents/[id]/file/route.ts`: descarga/visualización del PDF.
-  - `reports/summary/route.ts`: estadísticas para el dashboard de reportes.
-  - `reports/documents/route.ts`: export a CSV `reporte_documentos.csv`.
-  - `users/route.ts`: listado de usuarios (solo admin).
+- `student/`
+  - `enroll/page.tsx`: formulario para inscribirse a clases
+  - `enrollments/page.tsx`: tabla con inscripciones de la alumna
 
-- `src/components/`
+- `profesora/`
+  - `classes/page.tsx`: gestión de clases asignadas
+  - `choreographies/page.tsx`: gestión de coreografías
+  - `costumes/page.tsx`: gestión de vestuarios
 
-  - `atoms/BackButton.tsx`, etc.: componentes básicos.
-  - `molecules/Sidebar.tsx`: sidebar principal con navegación según rol.
-  - `organisms/Layout.tsx`: layout general con tema MUI + sidebar.
-  - `admin/ReviewDocumentsTable.tsx`, `AdminReportsDashboard.tsx`, `AdminUsersTable.tsx`, `RecentDocumentsTable.tsx`: componentes específicos para la sección admin.
+- `directora/`
+  - `events/page.tsx`: gestión de eventos académicos
+  - `attendance/page.tsx`: control de asistencias
 
-- `src/lib/`
+- `admin/`
+  - `users/page.tsx`: lista y registro de usuarios (solo admin)
+  - `enrollments/page.tsx`: revisión de inscripciones (admin y directora)
+  - `documents/page.tsx`: gestión de documentos (solo admin)
+  - `payments/page.tsx`: control de pagos (solo admin)
+  - `reports/page.tsx`: tablero de reportes + export CSV (admin y directora)
 
-  - `auth.ts`: configuración de NextAuth (credentials, callbacks, etc.).
-  - `prisma.ts`: cliente Prisma.
+### Directorio `app/api/`
 
-- `prisma/schema.prisma`: definición de modelos `User` y `Document`.
+- `auth/[...nextauth]/route.ts`: configuración de NextAuth
+- `auth/register/route.ts`: registro de alumna (POST)
+- `classes/route.ts`: gestión de clases (GET, POST)
+- `enrollments/`
+  - `submit/route.ts`: solicitud de inscripción (POST)
+  - `my/route.ts`: inscripciones del usuario autenticado (GET)
+  - `all/route.ts`: todas las inscripciones (admin/directora) (GET)
+  - `[id]/route.ts`: actualización de estado de inscripción (PATCH)
+- `reports/`
+  - `summary/route.ts`: estadísticas para el dashboard de reportes
+  - `enrollments/route.ts`: export a CSV de inscripciones
+- `users/route.ts`: listado y creación de usuarios (solo admin) (GET, POST)
 
-- `scripts/entrypoint.sh`: script de arranque en Docker (espera DB, aplica schema, seed y arranca Next.js).
+### Directorio `src/components/`
+
+- `atoms/BackButton.tsx`: componentes básicos
+- `molecules/Sidebar.tsx`: sidebar principal con navegación según rol
+- `organisms/Layout.tsx`: layout general con tema MUI + sidebar
+- `admin/`
+  - `AdminUsersTable.tsx`: tabla de usuarios con formulario de registro
+  - `AdminReportsDashboard.tsx`: dashboard de reportes
+  - `ReviewEnrollmentsTable.tsx`: tabla de revisión de inscripciones
+  - `RecentEnrollmentsTable.tsx`: tabla de inscripciones recientes
+
+### Directorio `src/lib/`
+
+- `auth.ts`: configuración de NextAuth (credentials, callbacks, etc.)
+- `prisma.ts`: cliente Prisma
+
+### Directorio `src/utils/`
+
+- `roles.ts`: definición de tipos y etiquetas de roles
+- `status.ts`: definición de tipos y etiquetas de estados
+
+### Directorio `prisma/`
+
+- `schema.prisma`: definición de modelos (User, Class, Schedule, Enrollment)
+
+### Directorio `scripts/`
+
+- `entrypoint.sh`: script de arranque en Docker (espera DB, aplica schema, seed y arranca Next.js)
+- `seed-admin.js`: script de seed que crea usuarios base (admin, directora, profesoras)
+- `check-users.js`: script auxiliar para verificar usuarios en la base de datos
+- `cleanup-old-users.js`: script auxiliar para limpiar usuarios antiguos
 
 ## Problemas comunes (troubleshooting rápido)
 
