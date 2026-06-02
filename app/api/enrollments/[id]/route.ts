@@ -13,7 +13,7 @@ export async function PATCH(
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!["ADMIN", "DIRECTORA_ACADEMICA"].includes(session.user?.role))
+  if (session.user?.role !== "ADMIN")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const id = params.id;

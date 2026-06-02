@@ -9,16 +9,46 @@ import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
+import TextField from "@mui/material/TextField";
 import jsPDF from "jspdf";
 import Image from "next/image";
 
 export default function StudentRegistrationFormPage() {
   const { data: session } = useSession();
   const [error, setError] = useState<string | null>(null);
+  
+  // Estado para los campos del formulario
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    cedula: "",
+    fechaNacimiento: "",
+    edad: "",
+    direccion: "",
+    representanteNombre: "",
+    representanteCI: "",
+    representanteTelefono: "",
+    observaciones: "",
+  });
 
   useEffect(() => {
     if (!session) {
       setError("Debes iniciar sesión para ver tu planilla de inscripción");
+    } else {
+      // Prellenar el formulario con los datos del usuario
+      const user = session.user as any;
+      setFormData({
+        nombre: user.nombre || "",
+        apellido: user.apellido || "",
+        cedula: user.cedula || "",
+        fechaNacimiento: user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : "",
+        edad: user.edad?.toString() || "",
+        direccion: user.direccion || "",
+        representanteNombre: "",
+        representanteCI: "",
+        representanteTelefono: "",
+        observaciones: "",
+      });
     }
   }, [session]);
 
@@ -51,15 +81,15 @@ export default function StudentRegistrationFormPage() {
       currentY += 10;
 
       doc.setFontSize(10);
-      doc.text(`Nombres y Apellidos: ${user.nombre || ""} ${user.apellido || ""}`, 14, currentY);
+      doc.text(`Nombres y Apellidos: ${formData.nombre || ""} ${formData.apellido || ""}`, 14, currentY);
       currentY += 8;
-      doc.text(`CI: ${user.cedula || ""}`, 14, currentY);
+      doc.text(`CI: ${formData.cedula || ""}`, 14, currentY);
       currentY += 8;
-      doc.text(`Fecha de nacimiento: ${user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : ""}`, 14, currentY);
+      doc.text(`Fecha de nacimiento: ${formData.fechaNacimiento || ""}`, 14, currentY);
       currentY += 8;
-      doc.text(`Edad: ${user.edad || ""}`, 14, currentY);
+      doc.text(`Edad: ${formData.edad || ""}`, 14, currentY);
       currentY += 8;
-      doc.text(`Dirección: ${user.direccion || ""}`, 14, currentY);
+      doc.text(`Dirección: ${formData.direccion || ""}`, 14, currentY);
       currentY += 15;
 
       // Datos del representante
@@ -70,11 +100,11 @@ export default function StudentRegistrationFormPage() {
       currentY += 10;
 
       doc.setFontSize(10);
-      doc.text("Nombres y Apellidos del Representante: ________________________________", 14, currentY);
+      doc.text(`Nombres y Apellidos del Representante: ${formData.representanteNombre || "________________"}`, 14, currentY);
       currentY += 8;
-      doc.text("CI: ________________________________", 14, currentY);
+      doc.text(`CI: ${formData.representanteCI || "________________"}`, 14, currentY);
       currentY += 8;
-      doc.text("Teléfono: ________________________________", 14, currentY);
+      doc.text(`Teléfono: ${formData.representanteTelefono || "________________"}`, 14, currentY);
       currentY += 15;
 
       // Observaciones
@@ -84,10 +114,12 @@ export default function StudentRegistrationFormPage() {
       doc.setFont("helvetica", "normal");
       currentY += 10;
       doc.setFontSize(10);
-      doc.text("_______________________________________________________________________________", 14, currentY);
-      currentY += 8;
-      doc.text("_______________________________________________________________________________", 14, currentY);
-      currentY += 15;
+      const observacionesLines = doc.splitTextToSize(formData.observaciones || "______________________________", 180);
+      observacionesLines.forEach((line: string) => {
+        doc.text(line, 14, currentY);
+        currentY += 8;
+      });
+      currentY += 7;
 
       // Compromiso de Inscripción
       doc.setFontSize(12);
@@ -134,7 +166,7 @@ export default function StudentRegistrationFormPage() {
       currentY += 10;
       doc.text(`______________________________ (${new Date().toLocaleDateString()})`, 14, currentY);
 
-      doc.save(`planilla-inscripcion-${user.nombre || "estudiante"}-${user.apellido || ""}.pdf`);
+      doc.save(`planilla-inscripcion-${formData.nombre || "estudiante"}-${formData.apellido || ""}.pdf`);
     } catch (error) {
       console.error("Error al generar PDF:", error);
       alert("Error al generar el PDF. Por favor intenta nuevamente.");
@@ -219,41 +251,66 @@ export default function StudentRegistrationFormPage() {
               <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
                 Nombres y Apellidos:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                {user.nombre || ""} {user.apellido || ""}
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
                 CI:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                {user.cedula || ""}
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.cedula}
+                onChange={(e) => setFormData({ ...formData, cedula: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
                 Fecha de nacimiento:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                {user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : ""}
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.fechaNacimiento}
+                onChange={(e) => setFormData({ ...formData, fechaNacimiento: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
                 Edad:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                {user.edad || ""}
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.edad}
+                onChange={(e) => setFormData({ ...formData, edad: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
                 Dirección:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                {user.direccion || ""}
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.direccion}
+                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
           </Box>
         </Box>
@@ -270,25 +327,40 @@ export default function StudentRegistrationFormPage() {
               <Typography sx={{ minWidth: 250, fontWeight: 500 }}>
                 Nombres y Apellidos del Representante:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                ________________________________
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.representanteNombre}
+                onChange={(e) => setFormData({ ...formData, representanteNombre: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography sx={{ minWidth: 250, fontWeight: 500 }}>
                 CI:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                ________________________________
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.representanteCI}
+                onChange={(e) => setFormData({ ...formData, representanteCI: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography sx={{ minWidth: 250, fontWeight: 500 }}>
                 Teléfono:
               </Typography>
-              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
-                ________________________________
-              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={formData.representanteTelefono}
+                onChange={(e) => setFormData({ ...formData, representanteTelefono: e.target.value })}
+                sx={{ flexGrow: 1 }}
+              />
             </Box>
           </Box>
         </Box>
@@ -300,8 +372,15 @@ export default function StudentRegistrationFormPage() {
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
             Observaciones:
           </Typography>
-          <Box sx={{ borderBottom: "1px solid #ccc", minHeight: 40, mb: 1 }} />
-          <Box sx={{ borderBottom: "1px solid #ccc", minHeight: 40 }} />
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            value={formData.observaciones}
+            onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+            placeholder="Escribe tus observaciones aquí..."
+          />
         </Box>
 
         <Divider sx={{ mb: 4 }} />

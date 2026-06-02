@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA") {
+    if (session.user?.role !== "ADMIN") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA") {
+    if (session.user?.role !== "ADMIN") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 

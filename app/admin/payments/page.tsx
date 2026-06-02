@@ -123,6 +123,7 @@ export default function AdminPaymentsPage() {
   }
 
   if (!session) return <p>Debes iniciar sesión.</p>;
+  if ((session as any)?.user?.role !== "ADMIN") return <p>No tienes permiso para acceder a esta página.</p>;
 
   return (
     <Container maxWidth="lg" sx={{ mt: 8 }}>
