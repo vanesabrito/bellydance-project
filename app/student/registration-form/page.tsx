@@ -29,48 +29,54 @@ export default function StudentRegistrationFormPage() {
   function handleDownloadPDF() {
     if (!session?.user) return;
 
-    const doc = new jsPDF();
-    const user = session.user as any;
+    try {
+      const doc = new jsPDF();
+      const user = session.user as any;
 
-    // Título
-    doc.setFontSize(20);
-    doc.text("PLANILLA DE INSCRIPCIÓN", 105, 20, { align: "center" });
-    
-    doc.setFontSize(12);
-    doc.text("Bellydance Project - Academia de Baile", 105, 30, { align: "center" });
-    
-    doc.setFontSize(10);
-    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 105, 40, { align: "center" });
+      // Título
+      doc.setFontSize(20);
+      doc.text("PLANILLA DE INSCRIPCIÓN", 105, 20, { align: "center" });
+      
+      doc.setFontSize(12);
+      doc.text("Bellydance Project - Academia de Baile", 105, 30, { align: "center" });
+      
+      doc.setFontSize(10);
+      doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 105, 40, { align: "center" });
 
-    // Datos del estudiante
-    const studentData = [
-      ["Nombre", user.nombre || ""],
-      ["Apellido", user.apellido || ""],
-      ["Cédula", user.cedula || ""],
-      ["Email", user.email || ""],
-      ["Fecha de Nacimiento", user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : ""],
-      ["Edad", user.edad?.toString() || ""],
-      ["Dirección", user.direccion || ""],
-    ];
+      // Datos del estudiante
+      const studentData = [
+        ["Nombre", user.nombre || ""],
+        ["Apellido", user.apellido || ""],
+        ["Cédula", user.cedula || ""],
+        ["Email", user.email || ""],
+        ["Fecha de Nacimiento", user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : ""],
+        ["Edad", user.edad?.toString() || ""],
+        ["Dirección", user.direccion || ""],
+      ];
 
-    autoTable(doc, {
-      startY: 50,
-      head: [["Campo", "Valor"]],
-      body: studentData,
-      theme: "grid",
-      headStyles: { fillColor: [66, 33, 99] },
-    });
+      autoTable(doc, {
+        startY: 50,
+        head: [["Campo", "Valor"]],
+        body: studentData,
+        theme: "grid",
+        headStyles: { fillColor: [66, 33, 99] },
+      });
 
-    // Información adicional
-    doc.setFontSize(10);
-    doc.text("Información de Contacto:", 14, doc.lastAutoTable.finalY + 20);
-    doc.text(`Teléfono: ________________________________`, 14, doc.lastAutoTable.finalY + 30);
-    doc.text(`Emergencia: ______________________________`, 14, doc.lastAutoTable.finalY + 40);
+      // Información adicional
+      const finalY = (doc as any).lastAutoTable?.finalY || 100;
+      doc.setFontSize(10);
+      doc.text("Información de Contacto:", 14, finalY + 20);
+      doc.text(`Teléfono: ________________________________`, 14, finalY + 30);
+      doc.text(`Emergencia: ______________________________`, 14, finalY + 40);
 
-    doc.setFontSize(8);
-    doc.text("Por favor complete esta planilla y preséntela en la academia.", 105, doc.lastAutoTable.finalY + 60, { align: "center" });
+      doc.setFontSize(8);
+      doc.text("Por favor complete esta planilla y preséntela en la academia.", 105, finalY + 60, { align: "center" });
 
-    doc.save(`planilla-inscripcion-${user.nombre}-${user.apellido}.pdf`);
+      doc.save(`planilla-inscripcion-${user.nombre || "estudiante"}-${user.apellido || ""}.pdf`);
+    } catch (error) {
+      console.error("Error al generar PDF:", error);
+      alert("Error al generar el PDF. Por favor intenta nuevamente.");
+    }
   }
 
   function handlePrint() {
