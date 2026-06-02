@@ -22,6 +22,7 @@ model User {
   reviewedEnrollments Enrollment[] @relation("ReviewedBy")
   taughtClasses   Class[] @relation("TaughtBy")
   attendances     Attendance[]
+  payments        Payment[]
   createdAt       DateTime @default(now())
 
   @@unique([cedula], name: "User_cedula_key")
@@ -87,6 +88,18 @@ model Attendance {
   createdAt   DateTime @default(now())
 }
 
+model Payment {
+  id              String   @id @default(cuid())
+  student         User     @relation(fields: [studentId], references: [id])
+  studentId       String
+  paymentDate     DateTime @default(now())
+  amount          Float
+  paymentType     PaymentType
+  referenceNumber String?
+  bank            String?
+  createdAt       DateTime @default(now())
+}
+
 enum Role {
   ADMIN
   DIRECTORA_ACADEMICA
@@ -108,4 +121,10 @@ enum DayOfWeek {
   FRIDAY
   SATURDAY
   SUNDAY
+}
+
+enum PaymentType {
+  EFECTIVO
+  PAGO_MOVIL
+  TRANSFERENCIA
 }

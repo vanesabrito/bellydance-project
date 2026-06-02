@@ -242,7 +242,7 @@ graph LR
 - **Gestión de Usuarios (IMPLEMENTADO)**: Registrar nuevos usuarios con formulario completo, ver lista de usuarios, asignar roles (ADMIN, DIRECTORA_ACADEMICA, PROFESORA, ALUMNA)
 - **Gestión de Inscripciones (IMPLEMENTADO)**: Ver todas las inscripciones del sistema, aprobar/rechazar inscripciones, agregar notas de revisión
 - **Gestión de Documentos (PLACEHOLDER)**: Página creada para gestión de documentos (pendiente de implementación)
-- **Control de Pagos (PLACEHOLDER)**: Página creada para control de pagos (pendiente de implementación)
+- **Control de Pagos (IMPLEMENTADO)**: Registrar pagos de alumnas con fecha, monto, tipo de pago (efectivo, pago móvil, transferencia), número de referencia y banco
 - **Reportes (IMPLEMENTADO)**: Acceder a estadísticas del sistema, exportar reportes CSV, ver métricas de usuarios e inscripciones
 
 #### Directora Académica
