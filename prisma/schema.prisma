@@ -21,6 +21,7 @@ model User {
   enrollments     Enrollment[]
   reviewedEnrollments Enrollment[] @relation("ReviewedBy")
   taughtClasses   Class[] @relation("TaughtBy")
+  attendances     Attendance[]
   createdAt       DateTime @default(now())
 
   @@unique([cedula], name: "User_cedula_key")
@@ -34,6 +35,7 @@ model Class {
   instructorId String
   schedules   Schedule[]
   enrollments Enrollment[]
+  attendances Attendance[]
   createdAt   DateTime   @default(now())
 }
 
@@ -62,6 +64,27 @@ model Enrollment {
   reviewer       User?    @relation("ReviewedBy", fields: [reviewerId], references: [id])
   reviewerId     String?
   createdAt      DateTime @default(now())
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  eventDate   DateTime
+  location    String?
+  createdAt   DateTime @default(now())
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  student     User     @relation(fields: [studentId], references: [id])
+  studentId   String
+  class       Class    @relation(fields: [classId], references: [id])
+  classId     String
+  date        DateTime @default(now())
+  present     Boolean  @default(false)
+  note        String?
+  createdAt   DateTime @default(now())
 }
 
 enum Role {

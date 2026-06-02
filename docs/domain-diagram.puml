@@ -1,0 +1,85 @@
+@startuml Diagrama de Dominio - Bellydance Project
+
+!theme plain
+
+entity "User" as user {
+  *id : String <<PK>>
+  --
+  *email : String <<UK>>
+  *password : String
+  *role : Role
+  nombre : String
+  apellido : String
+  cedula : String <<UK>>
+  fechaNacimiento : DateTime
+  edad : Int
+  direccion : String
+  createdAt : DateTime
+}
+
+entity "Class" as class {
+  *id : String <<PK>>
+  --
+  *name : String
+  description : String
+  *instructorId : String <<FK>>
+  createdAt : DateTime
+}
+
+entity "Schedule" as schedule {
+  *id : String <<PK>>
+  --
+  *classId : String <<FK>>
+  *dayOfWeek : DayOfWeek
+  *startTime : String
+  *endTime : String
+  location : String
+  createdAt : DateTime
+}
+
+entity "Enrollment" as enrollment {
+  *id : String <<PK>>
+  --
+  *studentId : String <<FK>>
+  *classId : String <<FK>>
+  enrollmentDate : DateTime
+  *status : EnrollmentStatus
+  reviewNote : String
+  reviewedAt : DateTime
+  reviewerId : String <<FK>>
+  createdAt : DateTime
+}
+
+enum "Role" as role {
+  ADMIN
+  DIRECTORA_ACADEMICA
+  PROFESORA
+  ALUMNA
+}
+
+enum "EnrollmentStatus" as enrollment_status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum "DayOfWeek" as day_of_week {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+user ||--o{ enrollment : "solicita"
+user ||--o{ enrollment : "revisa"
+user ||--o{ class : "imparte"
+class ||--o{ enrollment : "tiene"
+class ||--o{ schedule : "tiene"
+user }|.. role
+enrollment }|.. enrollment_status
+schedule }|.. day_of_week
+
+@enduml

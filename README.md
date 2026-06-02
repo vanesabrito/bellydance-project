@@ -195,76 +195,160 @@ Esta sección describe las vistas principales de la aplicación según el rol de
 
 ## Diagrama de Dominio del Sistema
 
-El diagrama de dominio muestra las entidades principales del sistema y sus relaciones:
+El diagrama de dominio muestra las entidades principales del sistema y sus relaciones.
+
+### Diagrama de Entidades y Relaciones
 
 ```mermaid
-erDiagram
-    User ||--o{ Enrollment : "solicita"
-    User ||--o{ Enrollment : "revisa"
-    User ||--o{ Class : "imparte"
-    Class ||--o{ Enrollment : "tiene"
-    Class ||--o{ Schedule : "tiene"
-    User {
-        string id PK
-        string email UK
-        string password
-        Role role
-        string nombre
-        string apellido
-        string cedula UK
-        DateTime fechaNacimiento
-        int edad
-        string direccion
-        DateTime createdAt
-    }
-    Class {
-        string id PK
-        string name
-        string description
-        string instructorId FK
-        DateTime createdAt
-    }
-    Schedule {
-        string id PK
-        string classId FK
-        DayOfWeek dayOfWeek
-        string startTime
-        string endTime
-        string location
-        DateTime createdAt
-    }
-    Enrollment {
-        string id PK
-        string studentId FK
-        string classId FK
-        DateTime enrollmentDate
-        EnrollmentStatus status
-        string reviewNote
-        DateTime reviewedAt
-        string reviewerId FK
-        DateTime createdAt
-    }
-    Role {
-        ADMIN
-        DIRECTORA_ACADEMICA
-        PROFESORA
-        ALUMNA
-    }
-    EnrollmentStatus {
-        PENDING
-        APPROVED
-        REJECTED
-    }
-    DayOfWeek {
-        MONDAY
-        TUESDAY
-        WEDNESDAY
-        THURSDAY
-        FRIDAY
-        SATURDAY
-        SUNDAY
-    }
+graph LR
+    A1[Administrador] -->|1:N revisa| D[Inscripción]
+    A2[Directora Académica] -->|1:N revisa| D
+    A3[Profesora] -->|1:N imparte| B[Clase]
+    A4[Alumna] -->|1:N solicita| D
+    
+    B -->|1:N tiene| D
+    B -->|1:N tiene| C[Horario]
+    
+    D -->|N:1 pertenece| A4
+    D -->|N:1 pertenece| B
+    C -->|N:1 pertenece| B
+    
+    style A1 fill:#ffcccc
+    style A2 fill:#ffebcc
+    style A3 fill:#ccffcc
+    style A4 fill:#e6ccff
+    style B fill:#fff4e1
+    style C fill:#e8f5e9
+    style D fill:#fce4ec
 ```
+
+**Cardinalidades de las relaciones por rol:**
+
+- **Administrador → Inscripción (1:N)**: Un administrador puede revisar muchas inscripciones
+- **Directora Académica → Inscripción (1:N)**: Una directora puede revisar muchas inscripciones
+- **Profesora → Clase (1:N)**: Una profesora puede impartir muchas clases
+- **Alumna → Inscripción (1:N)**: Una alumna puede solicitar muchas inscripciones
+- **Clase → Inscripción (1:N)**: Una clase puede tener muchas inscripciones
+- **Clase → Horario (1:N)**: Una clase puede tener muchos horarios
+- **Inscripción → Alumna (N:1)**: Una inscripción pertenece a una sola alumna
+- **Inscripción → Clase (N:1)**: Una inscripción pertenece a una sola clase
+- **Horario → Clase (N:1)**: Un horario pertenece a una sola clase
+
+### Funcionalidades por Rol en el Modelo de Dominio
+
+**Nota: Las funcionalidades marcadas como (IMPLEMENTADO) están completamente funcionales. Las marcadas como (PLACEHOLDER) tienen la página creada pero sin funcionalidad implementada aún.**
+
+#### Administrador
+- **Gestión de Usuarios (IMPLEMENTADO)**: Registrar nuevos usuarios con formulario completo, ver lista de usuarios, asignar roles (ADMIN, DIRECTORA_ACADEMICA, PROFESORA, ALUMNA)
+- **Gestión de Inscripciones (IMPLEMENTADO)**: Ver todas las inscripciones del sistema, aprobar/rechazar inscripciones, agregar notas de revisión
+- **Gestión de Documentos (PLACEHOLDER)**: Página creada para gestión de documentos (pendiente de implementación)
+- **Control de Pagos (PLACEHOLDER)**: Página creada para control de pagos (pendiente de implementación)
+- **Reportes (IMPLEMENTADO)**: Acceder a estadísticas del sistema, exportar reportes CSV, ver métricas de usuarios e inscripciones
+
+#### Directora Académica
+- **Gestión de Eventos (IMPLEMENTADO)**: Crear, ver y eliminar eventos académicos (presentaciones, recitales, talleres especiales)
+- **Control de Asistencias (IMPLEMENTADO)**: Registrar asistencia de alumnas a clases, ver historial de asistencias, agregar notas
+- **Revisión de Inscripciones (IMPLEMENTADO)**: Aprobar/rechazar inscripciones de alumnas, agregar notas de revisión (compartido con ADMIN)
+
+#### Profesora
+- **Gestión de Clases (PLACEHOLDER)**: Página creada para ver y gestionar clases asignadas (pendiente de implementación)
+- **Gestión de Coreografías (PLACEHOLDER)**: Página creada para diseñar y gestionar coreografías (pendiente de implementación)
+- **Gestión de Vestuarios (PLACEHOLDER)**: Página creada para crear y gestionar vestuarios (pendiente de implementación)
+
+#### Alumna
+- **Registro (IMPLEMENTADO)**: Registrarse en el sistema con datos personales completos (nombre, apellido, cédula, email, fecha de nacimiento, edad, dirección, contraseña)
+- **Inscripción a Clases (IMPLEMENTADO)**: Ver clases disponibles y solicitar inscripción
+- **Mis Inscripciones (IMPLEMENTADO)**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada), ver notas de revisión y fecha de revisión
+
+### Explicación del Modelo de Dominio
+
+El sistema de gestión de la academia de baile Bellydance Project se basa en cuatro entidades principales:
+
+#### 1. Usuario (User)
+Representa a todas las personas que interactúan con el sistema. Cada usuario tiene un rol específico que determina sus permisos y funcionalidades.
+
+**Campos principales:**
+- `id`: Identificador único del usuario
+- `email`: Correo electrónico (único, usado para login)
+- `password`: Contraseña hasheada
+- `role`: Rol del usuario (ADMIN, DIRECTORA_ACADEMICA, PROFESORA, ALUMNA)
+- `nombre`: Nombre del usuario
+- `apellido`: Apellido del usuario
+- `cedula`: Número de cédula (único)
+- `fechaNacimiento`: Fecha de nacimiento
+- `edad`: Edad del usuario
+- `direccion`: Dirección física
+- `createdAt`: Fecha de creación del registro
+
+**Roles:**
+- **ADMIN**: Tiene control total del sistema
+- **DIRECTORA_ACADEMICA**: Gestiona aspectos académicos y logísticos
+- **PROFESORA**: Imparte clases y gestiona coreografías/vestuarios
+- **ALUMNA**: Estudiante que se inscribe a clases
+
+#### 2. Clase (Class)
+Representa una clase de baile que se imparte en la academia.
+
+**Campos principales:**
+- `id`: Identificador único de la clase
+- `name`: Nombre de la clase
+- `description`: Descripción detallada de la clase
+- `instructorId`: ID de la profesora que imparte la clase (relación con User)
+- `createdAt`: Fecha de creación del registro
+
+#### 3. Horario (Schedule)
+Representa los horarios en los que se imparten las clases.
+
+**Campos principales:**
+- `id`: Identificador único del horario
+- `classId`: ID de la clase a la que pertenece el horario (relación con Class)
+- `dayOfWeek`: Día de la semana (LUNES a DOMINGO)
+- `startTime`: Hora de inicio (formato HH:MM)
+- `endTime`: Hora de fin (formato HH:MM)
+- `location`: Ubicación donde se imparte la clase
+- `createdAt`: Fecha de creación del registro
+
+#### 4. Inscripción (Enrollment)
+Representa la solicitud de una alumna para inscribirse a una clase.
+
+**Campos principales:**
+- `id`: Identificador único de la inscripción
+- `studentId`: ID de la alumna que solicita la inscripción (relación con User)
+- `classId`: ID de la clase a la que se quiere inscribir (relación con Class)
+- `enrollmentDate`: Fecha en que se realizó la solicitud
+- `status`: Estado de la inscripción (PENDING, APPROVED, REJECTED)
+- `reviewNote`: Nota de revisión agregada por el revisor
+- `reviewedAt`: Fecha en que se revisó la inscripción
+- `reviewerId`: ID del usuario que revisó la inscripción (relación con User)
+- `createdAt`: Fecha de creación del registro
+
+**Estados de inscripción:**
+- **PENDING**: Inscripción pendiente de revisión
+- **APPROVED**: Inscripción aprobada
+- **REJECTED**: Inscripción rechazada
+
+### Flujo de Trabajo del Modelo
+
+1. **Registro de Usuarios**: Las alumnas se registran en el sistema con sus datos personales. El administrador puede registrar usuarios con cualquier rol.
+
+2. **Creación de Clases**: El administrador crea clases y las asigna a profesoras específicas.
+
+3. **Definición de Horarios**: Cada clase tiene uno o más horarios definidos (día, hora, ubicación).
+
+4. **Solicitud de Inscripción**: Las alumnas solicitan inscribirse a las clases disponibles. Esto crea un registro de inscripción con estado PENDING.
+
+5. **Revisión de Inscripciones**: La directora académica o el administrador revisan las inscripciones y las aprueban o rechazan, agregando notas si es necesario.
+
+6. **Gestión Académica**: Las profesoras gestionan sus clases, crean coreografías y diseñan vestuarios.
+
+### Archivo PlantUML Adicional
+
+Para una visualización más detallada, el diagrama también está disponible en formato PlantUML en el archivo `docs/domain-diagram.puml`.
+
+**Para visualizar el diagrama PlantUML:**
+1. Abre el archivo `docs/domain-diagram.puml` en un editor que soporte PlantUML
+2. O usa una herramienta online como [PlantText](https://www.planttext.com/) o [PlantUML Online Editor](https://plantuml-editor.kkeisuke.com/)
+3. Copia el contenido del archivo y pégalo en la herramienta online para generar el diagrama
 
 ## Diagramas de Casos de Uso
 
@@ -532,24 +616,14 @@ Una vez todo está arriba, la aplicación queda disponible en:
 
 - http://localhost:3000
 
-### 3. Credenciales por defecto
+### 3. Credenciales por defecto del admin
 
-Los usuarios base se crean automáticamente al levantar el sistema:
+Tomadas de `docker-compose.yml`:
 
-**Administrador:**
 - **Email**: `admin@example.com`
 - **Password**: `adminpass`
 
-**Directora Académica:**
-- **Email**: `directora@bellydance.com`
-- **Password**: `directorapass`
-
-**Profesoras:**
-- Mariana Rodríguez: `mariana@bellydance.com` - Password: `profesorapass`
-- Veronica Sánchez: `veronica@bellydance.com` - Password: `profesorapass`
-- Isabella Martínez: `isabella@bellydance.com` - Password: `profesorapass`
-
-Puedes cambiar las credenciales del administrador editando las variables `ADMIN_EMAIL` y `ADMIN_PASSWORD` en `docker-compose.yml` y reconstruyendo la imagen (`docker compose up --build`). Para cambiar las credenciales de otros usuarios, edita el script `scripts/seed-admin.js`.
+Puedes cambiarlos editando las variables `ADMIN_EMAIL` y `ADMIN_PASSWORD` y reconstruyendo la imagen (`docker compose up --build`).
 
 ### 4. Volúmenes y archivos subidos
 
