@@ -6,15 +6,11 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import Divider from "@mui/material/Divider";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import Image from "next/image";
 
 export default function StudentRegistrationFormPage() {
   const { data: session } = useSession();
@@ -33,44 +29,110 @@ export default function StudentRegistrationFormPage() {
       const doc = new jsPDF();
       const user = session.user as any;
 
-      // Título
-      doc.setFontSize(20);
-      doc.text("PLANILLA DE INSCRIPCIÓN", 105, 20, { align: "center" });
-      
-      doc.setFontSize(12);
-      doc.text("Bellydance Project - Academia de Baile", 105, 30, { align: "center" });
-      
+      // Logo (simulado con texto ya que no podemos cargar imagen directamente en PDF)
       doc.setFontSize(10);
-      doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 105, 40, { align: "center" });
+      doc.text("Bellydance Project", 14, 15);
+      doc.setFontSize(8);
+      doc.text("Academia de Baile", 14, 20);
 
-      // Datos del estudiante
-      const studentData = [
-        ["Nombre", user.nombre || ""],
-        ["Apellido", user.apellido || ""],
-        ["Cédula", user.cedula || ""],
-        ["Email", user.email || ""],
-        ["Fecha de Nacimiento", user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : ""],
-        ["Edad", user.edad?.toString() || ""],
-        ["Dirección", user.direccion || ""],
+      // Título
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("Planilla de Inscripción", 105, 30, { align: "center" });
+      doc.setFont("helvetica", "normal");
+
+      let currentY = 45;
+
+      // Datos de la Alumna
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Datos de la Alumna:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      currentY += 10;
+
+      doc.setFontSize(10);
+      doc.text(`Nombres y Apellidos: ${user.nombre || ""} ${user.apellido || ""}`, 14, currentY);
+      currentY += 8;
+      doc.text(`CI: ${user.cedula || ""}`, 14, currentY);
+      currentY += 8;
+      doc.text(`Fecha de nacimiento: ${user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : ""}`, 14, currentY);
+      currentY += 8;
+      doc.text(`Edad: ${user.edad || ""}`, 14, currentY);
+      currentY += 8;
+      doc.text(`Dirección: ${user.direccion || ""}`, 14, currentY);
+      currentY += 15;
+
+      // Datos del representante
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Datos del representante (en caso de ser menor de edad la alumna):", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      currentY += 10;
+
+      doc.setFontSize(10);
+      doc.text("Nombres y Apellidos del Representante: ________________________________", 14, currentY);
+      currentY += 8;
+      doc.text("CI: ________________________________", 14, currentY);
+      currentY += 8;
+      doc.text("Teléfono: ________________________________", 14, currentY);
+      currentY += 15;
+
+      // Observaciones
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Observaciones:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      currentY += 10;
+      doc.setFontSize(10);
+      doc.text("_______________________________________________________________________________", 14, currentY);
+      currentY += 8;
+      doc.text("_______________________________________________________________________________", 14, currentY);
+      currentY += 15;
+
+      // Compromiso de Inscripción
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Compromiso de Inscripción (Representante o alumna mayor de 18 años)", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      currentY += 10;
+
+      doc.setFontSize(9);
+      const rules = [
+        "- Los pagos de las mensualidades deben ser realizados los primeros 5 días de cada mes.",
+        "- La mensualidad pagada de un mes no puede ser transferida a otro, aunque la alumna no haya asistido al mes pagado.",
+        "- Con previo justificativo de la inasistencia (constancia médica o causa mayor) se puede exonerar el pago si la inasistencia es de 1 a 2 meses. Tiene los primeros 10 días del mes para notificar.",
+        "- Después de 1 mes de inasistencia sin pago de mensualidad y sin aviso justificado, se debe pagar inscripción nuevamente.",
+        "- La academia trabaja todo el año. Solo se dan unas semanas en los festivos decembrinos.",
+        "- Se debe pagar las mensualidades de agosto y diciembre.",
+        "- Por cada año vencido se paga la inscripción anual (Reinscripción).",
+        "- Puntualidad en la hora de entrada; preferiblemente llegar 5 min antes de la hora de clase.",
+        "- El uniforme es: leggins negro, franela con logo (se adquiere en la academia) y para los eventos batola con logo y nombre de cada alumna (se adquiere en la academia).",
+        "- No se permiten representantes ni acompañantes dentro del salón de clases.",
+        "- No estacionar, ni esperar a las alumnas en la acera frente de la casa donde funciona la academia.",
+        "- Si sólo van a dejar o buscar a la alumna, deben realizarlo en el sentido de la flecha, tratando de no obstaculizar el tráfico.",
       ];
 
-      autoTable(doc, {
-        startY: 50,
-        head: [["Campo", "Valor"]],
-        body: studentData,
-        theme: "grid",
-        headStyles: { fillColor: [66, 33, 99] },
+      rules.forEach((rule) => {
+        doc.text(rule, 14, currentY);
+        currentY += 6;
       });
 
-      // Información adicional
-      const finalY = (doc as any).lastAutoTable?.finalY || 100;
-      doc.setFontSize(10);
-      doc.text("Información de Contacto:", 14, finalY + 20);
-      doc.text(`Teléfono: ________________________________`, 14, finalY + 30);
-      doc.text(`Emergencia: ______________________________`, 14, finalY + 40);
+      currentY += 10;
 
-      doc.setFontSize(8);
-      doc.text("Por favor complete esta planilla y preséntela en la academia.", 105, finalY + 60, { align: "center" });
+      // Firma y fecha
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Firma del representante o alumna de 18 años:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      currentY += 10;
+      doc.text("_______________________________________________________________________________", 14, currentY);
+      currentY += 15;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Fecha de inscripción:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      currentY += 10;
+      doc.text(`______________________________ (${new Date().toLocaleDateString()})`, 14, currentY);
 
       doc.save(`planilla-inscripcion-${user.nombre || "estudiante"}-${user.apellido || ""}.pdf`);
     } catch (error) {
@@ -125,71 +187,160 @@ export default function StudentRegistrationFormPage() {
           </Box>
         </Box>
 
-        <Box sx={{ mb: 4, p: 3, bgcolor: "#f5f5f5", borderRadius: 2 }}>
-          <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
-            PLANILLA DE INSCRIPCIÓN
-          </Typography>
-          <Typography variant="subtitle1" align="center" sx={{ mb: 2 }}>
-            Bellydance Project - Academia de Baile
-          </Typography>
-          <Typography variant="body2" align="center">
-            Fecha: {new Date().toLocaleDateString()}
-          </Typography>
-        </Box>
-
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Campo</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Valor</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell>Nombre</TableCell>
-              <TableCell>{user.nombre || "—"}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Apellido</TableCell>
-              <TableCell>{user.apellido || "—"}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Cédula</TableCell>
-              <TableCell>{user.cedula || "—"}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Email</TableCell>
-              <TableCell>{user.email || "—"}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Fecha de Nacimiento</TableCell>
-              <TableCell>{user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : "—"}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Edad</TableCell>
-              <TableCell>{user.edad || "—"}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Dirección</TableCell>
-              <TableCell>{user.direccion || "—"}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-
-        <Box sx={{ mt: 4, p: 3, bgcolor: "#f5f5f5", borderRadius: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-            Información de Contacto
-          </Typography>
-          <Box sx={{ display: "grid", gap: 2 }}>
-            <Typography variant="body2">
-              Teléfono: ________________________________
+        {/* Logo y Título */}
+        <Box sx={{ display: "flex", alignItems: "flex-start", mb: 4 }}>
+          <Box sx={{ mr: 3 }}>
+            <Image 
+              src="/logo-bellydance-project.png" 
+              alt="Logo Bellydance Project" 
+              width={80} 
+              height={80}
+            />
+          </Box>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+              Planilla de Inscripción
             </Typography>
-            <Typography variant="body2">
-              Emergencia: ______________________________
+            <Typography variant="body2" color="text.secondary">
+              Bellydance Project - Academia de Baile
             </Typography>
           </Box>
-          <Typography variant="body2" sx={{ mt: 2, fontStyle: "italic" }}>
-            Por favor complete esta planilla y preséntela en la academia.
+        </Box>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Datos de la Alumna */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+            Datos de la Alumna:
+          </Typography>
+          <Box sx={{ display: "grid", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
+                Nombres y Apellidos:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                {user.nombre || ""} {user.apellido || ""}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
+                CI:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                {user.cedula || ""}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
+                Fecha de nacimiento:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                {user.fechaNacimiento ? new Date(user.fechaNacimiento).toLocaleDateString() : ""}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
+                Edad:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                {user.edad || ""}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 200, fontWeight: 500 }}>
+                Dirección:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                {user.direccion || ""}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Datos del representante */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+            Datos del representante (en caso de ser menor de edad la alumna):
+          </Typography>
+          <Box sx={{ display: "grid", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 250, fontWeight: 500 }}>
+                Nombres y Apellidos del Representante:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                ________________________________
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 250, fontWeight: 500 }}>
+                CI:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                ________________________________
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ minWidth: 250, fontWeight: 500 }}>
+                Teléfono:
+              </Typography>
+              <Typography sx={{ borderBottom: "1px solid #ccc", flexGrow: 1, px: 1 }}>
+                ________________________________
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Observaciones */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+            Observaciones:
+          </Typography>
+          <Box sx={{ borderBottom: "1px solid #ccc", minHeight: 40, mb: 1 }} />
+          <Box sx={{ borderBottom: "1px solid #ccc", minHeight: 40 }} />
+        </Box>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Compromiso de Inscripción */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+            Compromiso de Inscripción (Representante o alumna mayor de 18 años)
+          </Typography>
+          <Box sx={{ display: "grid", gap: 1, fontSize: "0.875rem" }}>
+            <Typography>- Los pagos de las mensualidades deben ser realizados los primeros 5 días de cada mes.</Typography>
+            <Typography>- La mensualidad pagada de un mes no puede ser transferida a otro, aunque la alumna no haya asistido al mes pagado.</Typography>
+            <Typography sx={{ fontWeight: 500 }}>- Con previo justificativo de la inasistencia (constancia médica o causa mayor) se puede exonerar el pago si la inasistencia es de 1 a 2 meses. Tiene los primeros 10 días del mes para notificar.</Typography>
+            <Typography>- Después de 1 mes de inasistencia sin pago de mensualidad y sin aviso justificado, se debe pagar inscripción nuevamente.</Typography>
+            <Typography>- La academia trabaja todo el año. Solo se dan unas semanas en los festivos decembrinos.</Typography>
+            <Typography>- Se debe pagar las mensualidades de agosto y diciembre.</Typography>
+            <Typography>- Por cada año vencido se paga la inscripción anual (Reinscripción).</Typography>
+            <Typography>- Puntualidad en la hora de entrada; preferiblemente llegar 5 min antes de la hora de clase.</Typography>
+            <Typography>- El uniforme es: leggins negro, franela con logo (se adquiere en la academia) y para los eventos batola con logo y nombre de cada alumna (se adquiere en la academia).</Typography>
+            <Typography>- No se permiten representantes ni acompañantes dentro del salón de clases.</Typography>
+            <Typography>- No estacionar, ni esperar a las alumnas en la acera frente de la casa donde funciona la academia.</Typography>
+            <Typography>- Si sólo van a dejar o buscar a la alumna, deben realizarlo en el sentido de la flecha, tratando de no obstaculizar el tráfico.</Typography>
+          </Box>
+        </Box>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Firma y fecha */}
+        <Box sx={{ mt: 6 }}>
+          <Typography sx={{ fontWeight: 700, mb: 2 }}>
+            Firma del representante o alumna de 18 años:
+          </Typography>
+          <Box sx={{ borderBottom: "1px solid #ccc", minHeight: 40, mb: 4 }} />
+          
+          <Typography sx={{ fontWeight: 700, mb: 2 }}>
+            Fecha de inscripción:
+          </Typography>
+          <Typography sx={{ borderBottom: "1px solid #ccc", display: "inline-block", minWidth: 200, px: 1 }}>
+            {new Date().toLocaleDateString()}
           </Typography>
         </Box>
       </Paper>
