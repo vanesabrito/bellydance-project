@@ -259,6 +259,7 @@ graph LR
 - **Registro (IMPLEMENTADO)**: Registrarse en el sistema con datos personales completos (nombre, apellido, cédula, email, fecha de nacimiento, edad, dirección, contraseña)
 - **Inscripción a Clases (IMPLEMENTADO)**: Ver clases disponibles y solicitar inscripción
 - **Mis Inscripciones (IMPLEMENTADO)**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada), ver notas de revisión y fecha de revisión
+- **Planilla de Inscripción (IMPLEMENTADO)**: Ver y descargar planilla de inscripción con sus datos personales en formato PDF
 
 ### Explicación del Modelo de Dominio
 

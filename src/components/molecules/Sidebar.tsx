@@ -118,6 +118,20 @@ export default function Sidebar() {
                 <ListItemText primary="Mis inscripciones" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/registration-form"
+                selected={isSelected("/student/registration-form")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <DescriptionIcon />
+                </ListItemIcon>
+                <ListItemText primary="Planilla de Inscripción" />
+              </ListItemButton>
+            </ListItem>
           </>
         )}
 
