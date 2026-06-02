@@ -6,16 +6,32 @@ import bcrypt from "bcryptjs";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user?.role !== "ADMIN")
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  
+  const { searchParams } = new URL(req.url);
+  const roleFilter = searchParams.get("role");
+  
+  // Si se filtra por rol ALUMNA, permitir acceso a DIRECTORA_ACADEMICA
+  if (roleFilter === "ALUMNA") {
+    if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  } else {
+    if (session.user?.role !== "ADMIN")
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const whereClause = roleFilter ? { role: roleFilter } : {};
+  const selectFields = roleFilter === "ALUMNA" 
+    ? { id: true, email: true, role: true, nombre: true, apellido: true, createdAt: true }
+    : { id: true, email: true, role: true, createdAt: true };
 
   const users = await prisma.user.findMany({
+    where: whereClause,
     orderBy: { createdAt: "desc" },
-    select: { id: true, email: true, role: true, createdAt: true },
+    select: selectFields,
   } as any);
 
   return NextResponse.json({ ok: true, users });

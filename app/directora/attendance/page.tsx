@@ -109,7 +109,7 @@ export default function DirectoraAttendancePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.studentId || !formData.classId || !formData.date) return setError("Estudiante, clase y fecha son requeridos");
+    if (!formData.studentId || !formData.classId || !formData.date) return setError("Alumna, clase y fecha son requeridos");
     setLoading(true);
     setError(null);
     try {
@@ -157,7 +157,7 @@ export default function DirectoraAttendancePage() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Estudiante</TableCell>
+              <TableCell>Alumna</TableCell>
               <TableCell>Clase</TableCell>
               <TableCell>Fecha</TableCell>
               <TableCell>Estado</TableCell>
@@ -198,7 +198,7 @@ export default function DirectoraAttendancePage() {
             <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2, mt: 2 }}>
               <TextField
                 select
-                label="Estudiante"
+                label="Alumna"
                 value={formData.studentId}
                 onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                 fullWidth
