@@ -40,7 +40,10 @@ export default function RecoverPasswordPage() {
       const json = await res.json();
       
       if (json.ok) {
-        setSuccess("Se ha enviado una contraseña provisional a tu correo electrónico");
+        const message = json.temporaryPassword 
+          ? `Contraseña provisional: ${json.temporaryPassword}`
+          : "Se ha enviado una contraseña provisional a tu correo electrónico";
+        setSuccess(message);
         setEmail("");
       } else {
         setError(json.error || "No se pudo recuperar la contraseña");

@@ -70,7 +70,10 @@ export default function ChangePasswordPage() {
       const json = await res.json();
       
       if (json.ok) {
-        setSuccess("Contraseña cambiada exitosamente");
+        const message = json.newPassword 
+          ? `Contraseña cambiada exitosamente. Tu nueva contraseña es: ${json.newPassword}`
+          : "Contraseña cambiada exitosamente";
+        setSuccess(message);
         setOldPassword("");
         setNewPassword("");
         setConfirmPassword("");

@@ -54,7 +54,17 @@ export async function POST(req: Request) {
       data: { password: hash },
     });
 
-    return NextResponse.json({ ok: true, message: "Contraseña cambiada exitosamente" });
+    // Aquí se debería enviar el email con la nueva contraseña
+    // Por ahora, simulamos el envío mostrando la contraseña en la respuesta
+    // En producción, esto debería ser reemplazado por un servicio de email real
+    console.log(`Nueva contraseña para ${user.email}: ${newPassword}`);
+
+    return NextResponse.json({ 
+      ok: true, 
+      message: "Contraseña cambiada exitosamente",
+      // Solo para desarrollo - en producción eliminar este campo
+      newPassword: newPassword 
+    });
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ ok: false, error: "Error del servidor" }, { status: 500 });

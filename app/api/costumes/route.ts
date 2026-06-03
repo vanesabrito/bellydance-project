@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,43 +12,39 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    const classes = await prisma.class.findMany({
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+      return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
+    }
+
+    const costumes = await prisma.costume.findMany({
       where: session.user?.role === "PROFESORA" 
         ? { instructorId: session.user.id }
         : {},
       include: {
         instructor: {
           select: {
-            id: true,
             nombre: true,
             apellido: true,
           },
         },
-        schedules: true,
-        enrollments: {
-          include: {
-            student: {
-              select: {
-                id: true,
-                nombre: true,
-                apellido: true,
-                email: true,
-              },
-            },
+        choreography: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ ok: true, classes });
+    return NextResponse.json({ ok: true, costumes });
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ ok: false, error: "Error del servidor" }, { status: 500 });
   }
 }
 
-export async function PUT(req: Request) {
+export async function POST(req: Request) {
   try {
     const session: any = await getServerSession(authOptions as any);
     if (!session) {
@@ -60,28 +56,26 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { classId, supportMaterial } = body;
+    const { name, description, color, imageUrl, accessories, estimatedCost, choreographyId } = body;
 
-    const classRecord = await prisma.class.findUnique({
-      where: { id: classId },
-    });
-
-    if (!classRecord) {
-      return NextResponse.json({ ok: false, error: "Clase no encontrada" }, { status: 404 });
+    if (!name) {
+      return NextResponse.json({ ok: false, error: "El nombre es requerido" }, { status: 400 });
     }
 
-    if (session.user?.role === "PROFESORA" && classRecord.instructorId !== session.user.id) {
-      return NextResponse.json({ ok: false, error: "No tienes permiso para editar esta clase" }, { status: 403 });
-    }
-
-    const updatedClass = await prisma.class.update({
-      where: { id: classId },
+    const costume = await prisma.costume.create({
       data: {
-        supportMaterial: supportMaterial ? JSON.stringify(supportMaterial) : null,
+        name,
+        description,
+        color,
+        imageUrl,
+        accessories,
+        estimatedCost,
+        choreographyId,
+        instructorId: session.user.id,
       },
     });
 
-    return NextResponse.json({ ok: true, class: updatedClass });
+    return NextResponse.json({ ok: true, costume });
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ ok: false, error: "Error del servidor" }, { status: 500 });

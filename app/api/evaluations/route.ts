@@ -3,7 +3,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// GET - Obtener todos los registros de asistencia
+export const dynamic = 'force-dynamic';
+
+// GET - Obtener evaluaciones
 export async function GET(req: NextRequest) {
   try {
     const session: any = await getServerSession(authOptions as any);
@@ -17,12 +19,12 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const classId = searchParams.get("classId");
-    const date = searchParams.get("date");
+    const studentId = searchParams.get("studentId");
 
     const where: any = {};
     if (classId) {
       if (session.user?.role === "PROFESORA") {
-        // Profesoras solo pueden ver asistencia de sus clases
+        // Profesoras solo pueden ver evaluaciones de sus clases
         const classRecord = await prisma.class.findUnique({
           where: { id: classId },
           select: { instructorId: true },
@@ -33,18 +35,9 @@ export async function GET(req: NextRequest) {
       }
       where.classId = classId;
     }
-    if (date) {
-      const startDate = new Date(date);
-      startDate.setHours(0, 0, 0, 0);
-      const endDate = new Date(date);
-      endDate.setHours(23, 59, 59, 999);
-      where.date = {
-        gte: startDate,
-        lte: endDate,
-      };
-    }
+    if (studentId) where.studentId = studentId;
 
-    const attendances = await prisma.attendance.findMany({
+    const evaluations = await prisma.evaluation.findMany({
       where,
       include: {
         student: {
@@ -65,14 +58,14 @@ export async function GET(req: NextRequest) {
       orderBy: { date: "desc" },
     });
 
-    return NextResponse.json({ ok: true, attendances });
+    return NextResponse.json({ ok: true, evaluations });
   } catch (error) {
-    console.error("Error fetching attendances:", error);
-    return NextResponse.json({ ok: false, error: "Error al obtener asistencias" }, { status: 500 });
+    console.error("Error fetching evaluations:", error);
+    return NextResponse.json({ ok: false, error: "Error al obtener evaluaciones" }, { status: 500 });
   }
 }
 
-// POST - Registrar asistencia
+// POST - Crear evaluación
 export async function POST(req: NextRequest) {
   try {
     const session: any = await getServerSession(authOptions as any);
@@ -85,13 +78,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { studentId, classId, date, present, note, observations } = body;
+    const { studentId, classId, date, score, comments, progress } = body;
 
     if (!studentId || !classId || !date) {
       return NextResponse.json({ ok: false, error: "Estudiante, clase y fecha son requeridos" }, { status: 400 });
     }
 
-    // Verificar que la profesora tiene permiso para registrar asistencia en esta clase
+    // Verificar que la profesora tiene permiso para crear evaluaciones en esta clase
     if (session.user?.role === "PROFESORA") {
       const classRecord = await prisma.class.findUnique({
         where: { id: classId },
@@ -102,20 +95,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const attendance = await prisma.attendance.create({
+    const evaluation = await prisma.evaluation.create({
       data: {
         studentId,
         classId,
         date: new Date(date),
-        present: present ?? false,
-        note,
-        observations,
+        score: score ? parseFloat(score) : null,
+        comments,
+        progress,
       },
     });
 
-    return NextResponse.json({ ok: true, attendance });
+    return NextResponse.json({ ok: true, evaluation });
   } catch (error) {
-    console.error("Error creating attendance:", error);
-    return NextResponse.json({ ok: false, error: "Error al registrar asistencia" }, { status: 500 });
+    console.error("Error creating evaluation:", error);
+    return NextResponse.json({ ok: false, error: "Error al crear evaluación" }, { status: 500 });
   }
 }

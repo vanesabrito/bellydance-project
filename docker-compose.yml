@@ -32,6 +32,11 @@ services:
         condition: service_healthy
     volumes:
       - uploads:/usr/src/app/uploads
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
+    entrypoint: []
+    command: ["sh", "-c", "npx prisma generate && npx next dev"]
 
 volumes:
   db-data:

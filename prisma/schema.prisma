@@ -22,7 +22,11 @@ model User {
   reviewedEnrollments Enrollment[] @relation("ReviewedBy")
   taughtClasses   Class[] @relation("TaughtBy")
   attendances     Attendance[]
+  evaluations     Evaluation[]
   payments        Payment[]
+  costumes        Costume[] @relation("CostumeInstructor")
+  choreographies  Choreography[] @relation("ChoreographyInstructor")
+  choreographyParticipations ChoreographyParticipant[]
   createdAt       DateTime @default(now())
 
   @@unique([cedula], name: "User_cedula_key")
@@ -34,9 +38,11 @@ model Class {
   description String?
   instructor  User       @relation("TaughtBy", fields: [instructorId], references: [id])
   instructorId String
+  supportMaterial String? // JSON string with URLs for videos, music, documents
   schedules   Schedule[]
   enrollments Enrollment[]
   attendances Attendance[]
+  evaluations Evaluation[]
   createdAt   DateTime   @default(now())
 }
 
@@ -85,6 +91,20 @@ model Attendance {
   date        DateTime @default(now())
   present     Boolean  @default(false)
   note        String?
+  observations String? // Detailed observations for the student
+  createdAt   DateTime @default(now())
+}
+
+model Evaluation {
+  id          String   @id @default(cuid())
+  student     User     @relation(fields: [studentId], references: [id])
+  studentId   String
+  class       Class    @relation(fields: [classId], references: [id])
+  classId     String
+  date        DateTime @default(now())
+  score       Float?   // Score out of 10
+  comments    String?  // Comments on performance
+  progress    String?  // Progress notes
   createdAt   DateTime @default(now())
 }
 
@@ -98,6 +118,51 @@ model Payment {
   referenceNumber String?
   bank            String?
   createdAt       DateTime @default(now())
+}
+
+model Costume {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  color       String?
+  imageUrl    String?
+  accessories String?
+  estimatedCost Float?
+  status      CostumeStatus @default(DESIGN)
+  instructor  User         @relation("CostumeInstructor", fields: [instructorId], references: [id])
+  instructorId String
+  choreography Choreography? @relation(fields: [choreographyId], references: [id])
+  choreographyId String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Choreography {
+  id          String                      @id @default(cuid())
+  name        String
+  description String?
+  level       String?
+  music       String?
+  videoUrl    String?
+  duration    Int?                        // in minutes
+  status      ChoreographyStatus          @default(PRACTICE)
+  instructor  User                        @relation("ChoreographyInstructor", fields: [instructorId], references: [id])
+  instructorId String
+  costumes    Costume[]
+  participants ChoreographyParticipant[]
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+}
+
+model ChoreographyParticipant {
+  id             String       @id @default(cuid())
+  choreography   Choreography @relation(fields: [choreographyId], references: [id], onDelete: Cascade)
+  choreographyId String
+  student        User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId      String
+  createdAt      DateTime     @default(now())
+
+  @@unique([choreographyId, studentId])
 }
 
 enum Role {
@@ -127,4 +192,18 @@ enum PaymentType {
   EFECTIVO
   PAGO_MOVIL
   TRANSFERENCIA
+}
+
+enum CostumeStatus {
+  DESIGN
+  APPROVED
+  REJECTED
+  IN_PRODUCTION
+  COMPLETED
+}
+
+enum ChoreographyStatus {
+  PRACTICE
+  DEVELOPMENT
+  READY_FOR_PRESENTATION
 }

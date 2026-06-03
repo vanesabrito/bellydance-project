@@ -140,11 +140,8 @@ export default function LoginPage() {
             {loading ? "Entrando..." : "Entrar"}
           </Button>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
-            <Link href="/recover-password" style={{ textDecoration: "none", color: "#ec407a", textAlign: "center" }}>
-              Recuperar Acceso
-            </Link>
-            <Link href="/change-password" style={{ textDecoration: "none", color: "#ec407a", textAlign: "center" }}>
-              Cambiar Contraseña
+            <Link href="/recover-password" style={{ textDecoration: "none", color: "#1976d2", textAlign: "center" }}>
+              ¿Olvidaste tu Contraseña?
             </Link>
           </Box>
         </Box>
