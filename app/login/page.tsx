@@ -137,7 +137,7 @@ export default function LoginPage() {
               },
             }}
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? "Ingresando..." : "Ingresar"}
           </Button>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
             <Link href="/recover-password" style={{ textDecoration: "none", color: "#1976d2", textAlign: "center" }}>

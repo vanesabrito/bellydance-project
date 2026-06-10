@@ -4,7 +4,22 @@ Aplicación en **Next.js 14 (App Router)** + **TypeScript** para gestionar **ins
 
 ## Descripción del Sistema
 
-El sistema de gestión de la academia de baile Bellydance Project es una aplicación web completa que permite administrar usuarios, clases, inscripciones, documentos y pagos. El sistema está diseñado para trabajar con cuatro roles principales: Administrador, Directora Académica, Profesora y Alumna.
+El sistema de gestión de la academia de baile Bellydance Project es una aplicación web completa y profesional que permite administrar usuarios, clases, inscripciones, documentos, pagos, asistencia, evaluaciones y clasificación académica. El sistema está diseñado para trabajar con cuatro roles principales: Administrador, Directora Académica, Profesora y Alumna.
+
+### Características Principales
+
+- **Gestión de Usuarios**: Registro y administración de usuarios con diferentes roles y permisos
+- **Sistema de Inscripciones**: Flujo completo de solicitud, revisión y aprobación de inscripciones
+- **Clasificación Académica**: Sistema automático de clasificación por edad y nivel académico
+- **Gestión de Clases**: Administración de clases, horarios y asignación de profesoras
+- **Control de Asistencia**: Registro y seguimiento de asistencia de alumnas
+- **Evaluaciones**: Sistema de evaluación del progreso de las alumnas
+- **Gestión de Coreografías**: Creación y gestión de coreografías para presentaciones
+- **Diseño de Vestuarios**: Administración de vestuarios para coreografías
+- **Gestión de Documentos**: Control de documentos requeridos por las alumnas
+- **Control de Pagos**: Registro y seguimiento de pagos
+- **Reportes y Estadísticas**: Dashboard con métricas y exportación de reportes
+- **Recuperación de Contraseña**: Sistema seguro de recuperación de contraseña con tokens
 
 ## Roles del Sistema
 
@@ -13,7 +28,9 @@ El administrador tiene control total del sistema y puede realizar todas las oper
 
 **Funcionalidades:**
 - **Gestión de Usuarios**: Registrar nuevos usuarios, ver lista de usuarios registrados, asignar roles (Administrador, Directora Académica, Profesora, Alumna)
-- **Gestión de Inscripciones**: Ver todas las inscripciones, aprobar/rechazar inscripciones, agregar notas de revisión
+- **Gestión de Inscripciones**: Ver todas las inscripciones, aprobar/rechazar inscripciones, agregar notas de revisión, clasificación automática por edad y nivel
+- **Lista de Alumnas Inscritas**: Ver alumnas aprobadas organizadas por categoría de edad y nivel académico, reubicar alumnas entre niveles
+- **Clasificación Académica**: Ver estadísticas de clasificación por categoría y nivel, gestionar niveles académicos
 - **Gestión de Documentos**: Recepción de documentos, entrega de documentos, control de estados
 - **Control de Pagos**: Ver pagos realizados, registrar nuevos pagos, generar reportes de pagos
 - **Reportes**: Acceder a estadísticas del sistema, exportar reportes CSV, ver métricas de usuarios e inscripciones
@@ -27,9 +44,10 @@ La directora académica gestiona los aspectos académicos y logísticos de la ac
 
 **Funcionalidades:**
 - **Gestión de Eventos**: Crear y administrar eventos académicos (presentaciones, recitales, talleres especiales)
-- **Control de Asistencias**: Registrar y controlar la asistencia de las alumnas a las clases
-- **Revisión de Inscripciones**: Aprobar/rechazar inscripciones de alumnas
-- **Reportes Académicos**: Ver estadísticas de inscripciones y asistencia
+- **Control de Asistencias**: Registrar y controlar la asistencia de las alumnas a las clases, agregar observaciones detalladas
+- **Revisión de Inscripciones**: Aprobar/rechazar inscripciones de alumnas, agregar notas de revisión, clasificación automática por edad y nivel
+- **Lista de Alumnas Inscritas**: Ver alumnas aprobadas organizadas por categoría de edad y nivel académico, reubicar alumnas entre niveles
+- **Reportes Académicos**: Ver estadísticas de inscripciones, asistencia y clasificación académica
 
 **Credenciales por defecto:**
 - Email: `directora@bellydance.com`
@@ -39,8 +57,10 @@ La directora académica gestiona los aspectos académicos y logísticos de la ac
 Las profesoras son responsables de la enseñanza y gestión de sus clases:
 
 **Funcionalidades:**
-- **Gestión de Clases**: Ver y gestionar las clases asignadas, ver lista de alumnas inscritas
-- **Creación de Coreografías**: Diseñar y gestionar coreografías para presentaciones
+- **Gestión de Clases**: Ver y gestionar las clases asignadas, ver lista de alumnas inscritas, subir material de apoyo (videos, música, documentos)
+- **Registro de Asistencia**: Registrar asistencia de alumnas a sus clases, agregar observaciones detalladas por estudiante
+- **Evaluaciones**: Evaluar el progreso de las alumnas, asignar notas, agregar comentarios y notas de progreso
+- **Creación de Coreografías**: Diseñar y gestionar coreografías para presentaciones, subir videos y música
 - **Diseño de Vestuarios**: Crear y gestionar diseños de vestuarios para las coreografías
 
 **Profesoras actuales:**
@@ -53,9 +73,11 @@ Las alumnas son las estudiantes que participan en las clases de la academia:
 
 **Funcionalidades:**
 - **Registro**: Registrarse en el sistema con datos personales (nombre, apellido, cédula, fecha de nacimiento, edad, dirección, email, contraseña)
+- **Recuperación de Contraseña**: Recuperar contraseña mediante enlace enviado al email con token seguro
 - **Inscripción a Clases**: Ver clases disponibles y solicitar inscripción
-- **Mis Inscripciones**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada)
+- **Mis Inscripciones**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada), ver clasificación académica asignada
 - **Documentos**: Subir documentos requeridos, ver estado de documentos entregados
+- **Planilla de Inscripción**: Ver y descargar planilla de inscripción con sus datos personales en formato PDF
 
 **Datos de registro requeridos:**
 - Nombre
@@ -208,10 +230,24 @@ graph LR
     
     B -->|1:N tiene| D
     B -->|1:N tiene| C[Horario]
+    B -->|1:N tiene| E[Evaluación]
+    B -->|1:N tiene| F[Asistencia]
     
     D -->|N:1 pertenece| A4
     D -->|N:1 pertenece| B
     C -->|N:1 pertenece| B
+    E -->|N:1 pertenece| B
+    E -->|N:1 pertenece| A4
+    F -->|N:1 pertenece| B
+    F -->|N:1 pertenece| A4
+    
+    A4 -->|1:N realiza| F
+    A4 -->|1:N recibe| E
+    
+    B -->|1:N tiene| G[Coreografía]
+    G -->|1:N tiene| H[Vestuario]
+    G -->|1:N tiene| I[Participante]
+    I -->|N:1 es| A4
     
     style A1 fill:#ffcccc
     style A2 fill:#ffebcc
@@ -220,6 +256,11 @@ graph LR
     style B fill:#fff4e1
     style C fill:#e8f5e9
     style D fill:#fce4ec
+    style E fill:#e3f2fd
+    style F fill:#f3e5f5
+    style G fill:#fff9c4
+    style H fill:#ffe0b2
+    style I fill:#c8e6c9
 ```
 
 **Cardinalidades de las relaciones por rol:**
@@ -228,11 +269,20 @@ graph LR
 - **Directora Académica → Inscripción (1:N)**: Una directora puede revisar muchas inscripciones
 - **Profesora → Clase (1:N)**: Una profesora puede impartir muchas clases
 - **Alumna → Inscripción (1:N)**: Una alumna puede solicitar muchas inscripciones
+- **Alumna → Asistencia (1:N)**: Una alumna tiene registros de asistencia
+- **Alumna → Evaluación (1:N)**: Una alumna recibe evaluaciones
 - **Clase → Inscripción (1:N)**: Una clase puede tener muchas inscripciones
 - **Clase → Horario (1:N)**: Una clase puede tener muchos horarios
+- **Clase → Evaluación (1:N)**: Una clase puede tener muchas evaluaciones
+- **Clase → Asistencia (1:N)**: Una clase puede tener registros de asistencia
+- **Clase → Coreografía (1:N)**: Una clase puede tener muchas coreografías
 - **Inscripción → Alumna (N:1)**: Una inscripción pertenece a una sola alumna
 - **Inscripción → Clase (N:1)**: Una inscripción pertenece a una sola clase
 - **Horario → Clase (N:1)**: Un horario pertenece a una sola clase
+- **Evaluación → Alumna (N:1)**: Una evaluación pertenece a una sola alumna
+- **Evaluación → Clase (N:1)**: Una evaluación pertenece a una sola clase
+- **Asistencia → Alumna (N:1)**: Un registro de asistencia pertenece a una sola alumna
+- **Asistencia → Clase (N:1)**: Un registro de asistencia pertenece a una sola clase
 
 ### Funcionalidades por Rol en el Modelo de Dominio
 
@@ -240,30 +290,37 @@ graph LR
 
 #### Administrador
 - **Gestión de Usuarios (IMPLEMENTADO)**: Registrar nuevos usuarios con formulario completo, ver lista de usuarios, asignar roles (ADMIN, DIRECTORA_ACADEMICA, PROFESORA, ALUMNA)
-- **Gestión de Inscripciones (IMPLEMENTADO)**: Ver todas las inscripciones del sistema, aprobar/rechazar inscripciones, agregar notas de revisión
+- **Gestión de Inscripciones (IMPLEMENTADO)**: Ver todas las inscripciones del sistema, aprobar/rechazar inscripciones, agregar notas de revisión, clasificación automática por edad y nivel al aprobar
+- **Lista de Alumnas Inscritas (IMPLEMENTADO)**: Ver alumnas aprobadas organizadas por categoría de edad y nivel académico (9 categorías), reubicar alumnas entre niveles, filtros y búsqueda
+- **Clasificación Académica (IMPLEMENTADO)**: Ver estadísticas de clasificación por categoría y nivel, gestión de niveles académicos
 - **Gestión de Documentos (PLACEHOLDER)**: Página creada para gestión de documentos (pendiente de implementación)
 - **Control de Pagos (IMPLEMENTADO)**: Registrar pagos de alumnas con fecha, monto, tipo de pago (efectivo, pago móvil, transferencia), número de referencia y banco
 - **Reportes (IMPLEMENTADO)**: Acceder a estadísticas del sistema, exportar reportes CSV, ver métricas de usuarios e inscripciones
 
 #### Directora Académica
 - **Gestión de Eventos (IMPLEMENTADO)**: Crear, ver y eliminar eventos académicos (presentaciones, recitales, talleres especiales)
-- **Control de Asistencias (IMPLEMENTADO)**: Registrar asistencia de alumnas a clases, ver historial de asistencias, agregar notas
-- **Revisión de Inscripciones (IMPLEMENTADO)**: Aprobar/rechazar inscripciones de alumnas, agregar notas de revisión (compartido con ADMIN)
+- **Control de Asistencias (IMPLEMENTADO)**: Registrar asistencia de alumnas a clases, ver historial de asistencias, agregar observaciones detalladas por estudiante
+- **Revisión de Inscripciones (IMPLEMENTADO)**: Aprobar/rechazar inscripciones de alumnas, agregar notas de revisión, clasificación automática por edad y nivel (compartido con ADMIN)
+- **Lista de Alumnas Inscritas (IMPLEMENTADO)**: Ver alumnas aprobadas organizadas por categoría de edad y nivel académico (9 categorías), reubicar alumnas entre niveles, filtros y búsqueda
+- **Reportes Académicos (IMPLEMENTADO)**: Ver estadísticas de inscripciones, asistencia y clasificación académica
 
 #### Profesora
-- **Gestión de Clases (PLACEHOLDER)**: Página creada para ver y gestionar clases asignadas (pendiente de implementación)
-- **Gestión de Coreografías (PLACEHOLDER)**: Página creada para diseñar y gestionar coreografías (pendiente de implementación)
-- **Gestión de Vestuarios (PLACEHOLDER)**: Página creada para crear y gestionar vestuarios (pendiente de implementación)
+- **Gestión de Clases (IMPLEMENTADO)**: Ver y gestionar las clases asignadas, ver lista de alumnas inscritas, subir material de apoyo (videos, música, documentos)
+- **Registro de Asistencia (IMPLEMENTADO)**: Registrar asistencia de alumnas a sus clases, agregar observaciones detalladas por estudiante
+- **Evaluaciones (IMPLEMENTADO)**: Evaluar el progreso de las alumnas, asignar notas, agregar comentarios y notas de progreso
+- **Gestión de Coreografías (IMPLEMENTADO)**: Crear, ver y gestionar coreografías, asignar a clases, subir videos y música, gestionar participantes
+- **Gestión de Vestuarios (IMPLEMENTADO)**: Crear, ver y gestionar diseños de vestuarios, asignar a coreografías, gestionar estados
 
 #### Alumna
 - **Registro (IMPLEMENTADO)**: Registrarse en el sistema con datos personales completos (nombre, apellido, cédula, email, fecha de nacimiento, edad, dirección, contraseña)
+- **Recuperación de Contraseña (IMPLEMENTADO)**: Recuperar contraseña mediante enlace enviado al email con token seguro y expiración
 - **Inscripción a Clases (IMPLEMENTADO)**: Ver clases disponibles y solicitar inscripción
-- **Mis Inscripciones (IMPLEMENTADO)**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada), ver notas de revisión y fecha de revisión
+- **Mis Inscripciones (IMPLEMENTADO)**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada), ver notas de revisión y fecha de revisión, ver clasificación académica asignada
 - **Planilla de Inscripción (IMPLEMENTADO)**: Ver y descargar planilla de inscripción con sus datos personales en formato PDF
 
 ### Explicación del Modelo de Dominio
 
-El sistema de gestión de la academia de baile Bellydance Project se basa en cuatro entidades principales:
+El sistema de gestión de la academia de baile Bellydance Project se basa en múltiples entidades que interactúan entre sí:
 
 #### 1. Usuario (User)
 Representa a todas las personas que interactúan con el sistema. Cada usuario tiene un rol específico que determina sus permisos y funcionalidades.
@@ -279,6 +336,8 @@ Representa a todas las personas que interactúan con el sistema. Cada usuario ti
 - `fechaNacimiento`: Fecha de nacimiento
 - `edad`: Edad del usuario
 - `direccion`: Dirección física
+- `resetToken`: Token para recuperación de contraseña
+- `resetTokenExpires`: Fecha de expiración del token de recuperación
 - `createdAt`: Fecha de creación del registro
 
 **Roles:**
@@ -295,6 +354,7 @@ Representa una clase de baile que se imparte en la academia.
 - `name`: Nombre de la clase
 - `description`: Descripción detallada de la clase
 - `instructorId`: ID de la profesora que imparte la clase (relación con User)
+- `supportMaterial`: Material de apoyo (JSON con URLs de videos, música, documentos)
 - `createdAt`: Fecha de creación del registro
 
 #### 3. Horario (Schedule)
@@ -318,6 +378,8 @@ Representa la solicitud de una alumna para inscribirse a una clase.
 - `classId`: ID de la clase a la que se quiere inscribir (relación con Class)
 - `enrollmentDate`: Fecha en que se realizó la solicitud
 - `status`: Estado de la inscripción (PENDING, APPROVED, REJECTED)
+- `academicLevel`: Nivel académico (BASICO, INTERMEDIO, AVANZADO)
+- `ageCategory`: Categoría de edad (MINI_BELLYDANCE, BELLYDANCE_ADOLESCENTES, BELLYDANCE_ADULTAS)
 - `reviewNote`: Nota de revisión agregada por el revisor
 - `reviewedAt`: Fecha en que se revisó la inscripción
 - `reviewerId`: ID del usuario que revisó la inscripción (relación con User)
@@ -327,6 +389,84 @@ Representa la solicitud de una alumna para inscribirse a una clase.
 - **PENDING**: Inscripción pendiente de revisión
 - **APPROVED**: Inscripción aprobada
 - **REJECTED**: Inscripción rechazada
+
+**Niveles académicos:**
+- **BASICO**: Nivel básico de aprendizaje
+- **INTERMEDIO**: Nivel intermedio de aprendizaje
+- **AVANZADO**: Nivel avanzado de aprendizaje
+
+**Categorías de edad:**
+- **MINI_BELLYDANCE**: Alumnas de 4 a 11 años
+- **BELLYDANCE_ADOLESCENTES**: Alumnas de 12 a 17 años
+- **BELLYDANCE_ADULTAS**: Alumnas de 18 años en adelante
+
+#### 5. Asistencia (Attendance)
+Representa el registro de asistencia de una alumna a una clase.
+
+**Campos principales:**
+- `id`: Identificador único del registro de asistencia
+- `studentId`: ID de la alumna (relación con User)
+- `classId`: ID de la clase (relación con Class)
+- `date`: Fecha del registro de asistencia
+- `present`: Indica si la alumna estuvo presente
+- `note`: Nota breve sobre la asistencia
+- `observations`: Observaciones detalladas sobre el desempeño de la alumna
+- `createdAt`: Fecha de creación del registro
+
+#### 6. Evaluación (Evaluation)
+Representa la evaluación del progreso de una alumna en una clase.
+
+**Campos principales:**
+- `id`: Identificador único de la evaluación
+- `studentId`: ID de la alumna evaluada (relación con User)
+- `classId`: ID de la clase (relación con Class)
+- `date`: Fecha de la evaluación
+- `score`: Nota numérica (0-10)
+- `comments`: Comentarios sobre el desempeño
+- `progress`: Notas de progreso
+- `createdAt`: Fecha de creación del registro
+
+#### 7. Coreografía (Choreography)
+Representa una coreografía diseñada para presentaciones.
+
+**Campos principales:**
+- `id`: Identificador único de la coreografía
+- `name`: Nombre de la coreografía
+- `description`: Descripción de la coreografía
+- `level`: Nivel de dificultad
+- `music`: URL de la música
+- `videoUrl`: URL del video de referencia
+- `duration`: Duración en minutos
+- `status`: Estado (PRACTICE, DEVELOPMENT, READY_FOR_PRESENTATION)
+- `instructorId`: ID de la profesora creadora (relación con User)
+- `createdAt`: Fecha de creación del registro
+- `updatedAt`: Fecha de última actualización
+
+#### 8. Vestuario (Costume)
+Representa un diseño de vestuario para una coreografía.
+
+**Campos principales:**
+- `id`: Identificador único del vestuario
+- `name`: Nombre del vestuario
+- `description`: Descripción del diseño
+- `color`: Color principal
+- `imageUrl`: URL de la imagen del diseño
+- `accessories`: Accesorios incluidos
+- `estimatedCost`: Costo estimado
+- `status`: Estado (DESIGN, APPROVED, REJECTED, IN_PRODUCTION, COMPLETED)
+- `instructorId`: ID de la profesora diseñadora (relación con User)
+- `choreographyId`: ID de la coreografía asociada (relación con Choreography)
+- `createdAt`: Fecha de creación del registro
+- `updatedAt`: Fecha de última actualización
+
+#### 9. Participante de Coreografía (ChoreographyParticipant)
+Representa la participación de una alumna en una coreografía.
+
+**Campos principales:**
+- `id`: Identificador único de la participación
+- `choreographyId`: ID de la coreografía (relación con Choreography)
+- `studentId`: ID de la alumna participante (relación con User)
+- `createdAt`: Fecha de creación del registro
 
 ### Flujo de Trabajo del Modelo
 
@@ -338,9 +478,13 @@ Representa la solicitud de una alumna para inscribirse a una clase.
 
 4. **Solicitud de Inscripción**: Las alumnas solicitan inscribirse a las clases disponibles. Esto crea un registro de inscripción con estado PENDING.
 
-5. **Revisión de Inscripciones**: La directora académica o el administrador revisan las inscripciones y las aprueban o rechazan, agregando notas si es necesario.
+5. **Revisión y Clasificación de Inscripciones**: La directora académica o el administrador revisan las inscripciones, las aprueban o rechazan, y el sistema clasifica automáticamente por edad y nivel académico.
 
-6. **Gestión Académica**: Las profesoras gestionan sus clases, crean coreografías y diseñan vestuarios.
+6. **Gestión Académica**: Las profesoras gestionan sus clases, registran asistencia, evalúan alumnas, crean coreografías y diseñan vestuarios.
+
+7. **Clasificación Académica**: El sistema clasifica automáticamente a las alumnas por categoría de edad (Mini Bellydance 4-11, Adolescentes 12-17, Adultas 18+) y nivel académico (Básico, Intermedio, Avanzado).
+
+8. **Gestión de Lista de Alumnas Inscritas**: Administradores y directoras pueden ver alumnas aprobadas organizadas en 9 categorías (3 categorías de edad × 3 niveles), reubicar alumnas entre niveles, y filtrar por categoría y nivel.
 
 ### Archivo PlantUML Adicional
 
@@ -362,10 +506,12 @@ graph TD
     Admin[Administrador]
     CU1[Gestionar Usuarios]
     CU2[Gestionar Inscripciones]
-    CU3[Gestionar Documentos]
-    CU4[Controlar Pagos]
-    CU5[Generar Reportes]
-    CU6[Ver Estadísticas]
+    CU3[Lista de Alumnas Inscritas]
+    CU4[Clasificación Académica]
+    CU5[Gestionar Documentos]
+    CU6[Controlar Pagos]
+    CU7[Generar Reportes]
+    CU8[Ver Estadísticas]
     
     Admin --> CU1
     Admin --> CU2
@@ -373,6 +519,8 @@ graph TD
     Admin --> CU4
     Admin --> CU5
     Admin --> CU6
+    Admin --> CU7
+    Admin --> CU8
     
     CU1 --> CU1_1[Registrar Nuevo Usuario]
     CU1 --> CU1_2[Ver Lista de Usuarios]
@@ -382,21 +530,33 @@ graph TD
     CU2 --> CU2_2[Aprobar Inscripción]
     CU2 --> CU2_3[Rechazar Inscripción]
     CU2 --> CU2_4[Agregar Nota de Revisión]
+    CU2 --> CU2_5[Asignar Nivel Académico]
     
-    CU3 --> CU3_1[Recibir Documentos]
-    CU3 --> CU3_2[Revisar Documentos]
-    CU3 --> CU3_3[Entregar Documentos]
+    CU3 --> CU3_1[Ver Alumnas Aprobadas]
+    CU3 --> CU3_2[Ver por Categoría de Edad]
+    CU3 --> CU3_3[Ver por Nivel Académico]
+    CU3 --> CU3_4[Reubicar Alumna de Nivel]
+    CU3 --> CU3_5[Filtrar y Buscar]
     
-    CU4 --> CU4_1[Registrar Pagos]
-    CU4 --> CU4_2[Ver Historial de Pagos]
-    CU4 --> CU4_3[Generar Reporte de Pagos]
+    CU4 --> CU4_1[Ver Estadísticas por Categoría]
+    CU4 --> CU4_2[Ver Estadísticas por Nivel]
+    CU4 --> CU4_3[Ver Distribución Combinada]
     
-    CU5 --> CU5_1[Exportar CSV]
-    CU5 --> CU5_2[Ver Reportes Detallados]
+    CU5 --> CU5_1[Recibir Documentos]
+    CU5 --> CU5_2[Revisar Documentos]
+    CU5 --> CU5_3[Entregar Documentos]
     
-    CU6 --> CU6_1[Ver Métricas de Usuarios]
-    CU6 --> CU6_2[Ver Métricas de Inscripciones]
-    CU6 --> CU6_3[Ver Métricas de Pagos]
+    CU6 --> CU6_1[Registrar Pagos]
+    CU6 --> CU6_2[Ver Historial de Pagos]
+    CU6 --> CU6_3[Generar Reporte de Pagos]
+    
+    CU7 --> CU7_1[Exportar CSV]
+    CU7 --> CU7_2[Ver Reportes Detallados]
+    
+    CU8 --> CU8_1[Ver Métricas de Usuarios]
+    CU8 --> CU8_2[Ver Métricas de Inscripciones]
+    CU8 --> CU8_3[Ver Métricas de Pagos]
+    CU8 --> CU8_4[Ver Métricas de Clasificación]
 ```
 
 #### Casos de Uso de la Directora Académica
@@ -407,12 +567,14 @@ graph TD
     CU1[Gestionar Eventos]
     CU2[Controlar Asistencias]
     CU3[Revisar Inscripciones]
-    CU4[Ver Reportes Académicos]
+    CU4[Lista de Alumnas Inscritas]
+    CU5[Ver Reportes Académicos]
     
     Directora --> CU1
     Directora --> CU2
     Directora --> CU3
     Directora --> CU4
+    Directora --> CU5
     
     CU1 --> CU1_1[Crear Evento]
     CU1 --> CU1_2[Ver Lista de Eventos]
@@ -423,15 +585,24 @@ graph TD
     CU2 --> CU2_2[Ver Estadísticas de Asistencia]
     CU2 --> CU2_3[Ver Reporte de Ausencias]
     CU2 --> CU2_4[Filtrar por Fecha y Clase]
+    CU2 --> CU2_5[Agregar Observaciones Detalladas]
     
     CU3 --> CU3_1[Ver Inscripciones Pendientes]
     CU3 --> CU3_2[Aprobar Inscripción]
     CU3 --> CU3_3[Rechazar Inscripción]
     CU3 --> CU3_4[Agregar Nota de Revisión]
+    CU3 --> CU3_5[Asignar Nivel Académico]
     
-    CU4 --> CU4_1[Ver Estadísticas de Inscripciones]
-    CU4 --> CU4_2[Ver Estadísticas de Asistencia]
-    CU4 --> CU4_3[Exportar Reportes]
+    CU4 --> CU4_1[Ver Alumnas Aprobadas]
+    CU4 --> CU4_2[Ver por Categoría de Edad]
+    CU4 --> CU4_3[Ver por Nivel Académico]
+    CU4 --> CU4_4[Reubicar Alumna de Nivel]
+    CU4 --> CU4_5[Filtrar y Buscar]
+    
+    CU5 --> CU5_1[Ver Estadísticas de Inscripciones]
+    CU5 --> CU5_2[Ver Estadísticas de Asistencia]
+    CU5 --> CU5_3[Ver Estadísticas de Clasificación]
+    CU5 --> CU5_4[Exportar Reportes]
 ```
 
 #### Casos de Uso de la Profesora
@@ -440,27 +611,46 @@ graph TD
 graph TD
     Profesora[Profesora]
     CU1[Gestionar Clases]
-    CU2[Gestionar Coreografías]
-    CU3[Gestionar Vestuarios]
+    CU2[Registro de Asistencia]
+    CU3[Evaluaciones]
+    CU4[Gestionar Coreografías]
+    CU5[Gestionar Vestuarios]
     
     Profesora --> CU1
     Profesora --> CU2
     Profesora --> CU3
+    Profesora --> CU4
+    Profesora --> CU5
     
     CU1 --> CU1_1[Ver Clases Asignadas]
     CU1 --> CU1_2[Ver Detalles de Clase]
     CU1 --> CU1_3[Ver Alumnas Inscritas]
-    CU1 --> CU1_4[Ver Información de Asistencia]
+    CU1 --> CU1_4[Subir Material de Apoyo]
+    CU1 --> CU1_5[Gestionar Videos y Música]
     
-    CU2 --> CU2_1[Crear Coreografía]
-    CU2 --> CU2_2[Ver Lista de Coreografías]
-    CU2 --> CU2_3[Asignar a Clase]
-    CU2 --> CU2_4[Ver Detalles de Coreografía]
+    CU2 --> CU2_1[Registrar Asistencia]
+    CU2 --> CU2_2[Ver Historial de Asistencia]
+    CU2 --> CU2_3[Agregar Observaciones Detalladas]
+    CU2 --> CU2_4[Filtrar por Fecha y Clase]
     
-    CU3 --> CU3_1[Crear Diseño de Vestuario]
-    CU3 --> CU3_2[Ver Lista de Vestuarios]
-    CU3 --> CU3_3[Asignar a Coreografía]
-    CU3 --> CU3_4[Ver Detalles de Vestuario]
+    CU3 --> CU3_1[Crear Evaluación]
+    CU3 --> CU3_2[Asignar Nota]
+    CU3 --> CU3_3[Agregar Comentarios]
+    CU3 --> CU3_4[Ver Progreso de Alumnas]
+    CU3 --> CU3_5[Ver Historial de Evaluaciones]
+    
+    CU4 --> CU4_1[Crear Coreografía]
+    CU4 --> CU4_2[Ver Lista de Coreografías]
+    CU4 --> CU4_3[Asignar a Clase]
+    CU4 --> CU4_4[Ver Detalles de Coreografía]
+    CU4 --> CU4_5[Subir Videos y Música]
+    CU4 --> CU4_6[Gestionar Participantes]
+    
+    CU5 --> CU5_1[Crear Diseño de Vestuario]
+    CU5 --> CU5_2[Ver Lista de Vestuarios]
+    CU5 --> CU5_3[Asignar a Coreografía]
+    CU5 --> CU5_4[Ver Detalles de Vestuario]
+    CU5 --> CU5_5[Gestionar Estados]
 ```
 
 #### Casos de Uso de la Alumna
@@ -470,10 +660,12 @@ graph TD
     Alumna[Alumna]
     CU1[Registrarse en el Sistema]
     CU2[Iniciar Sesión]
-    CU3[Inscribirse a Clases]
-    CU4[Ver Mis Inscripciones]
-    CU5[Subir Documentos]
-    CU6[Ver Estado de Documentos]
+    CU3[Recuperar Contraseña]
+    CU4[Inscribirse a Clases]
+    CU5[Ver Mis Inscripciones]
+    CU6[Subir Documentos]
+    CU7[Ver Estado de Documentos]
+    CU8[Planilla de Inscripción]
     
     Alumna --> CU1
     Alumna --> CU2
@@ -481,6 +673,8 @@ graph TD
     Alumna --> CU4
     Alumna --> CU5
     Alumna --> CU6
+    Alumna --> CU7
+    Alumna --> CU8
     
     CU1 --> CU1_1[Completar Formulario de Registro]
     CU1 --> CU1_2[Ingresar Datos Personales]
@@ -489,25 +683,34 @@ graph TD
     CU2 --> CU2_1[Ingresar Email y Contraseña]
     CU2 --> CU2_2[Acceder al Dashboard]
     
-    CU3 --> CU3_1[Ver Clases Disponibles]
-    CU3 --> CU3_2[Seleccionar Clase]
-    CU3 --> CU3_3[Solicitar Inscripción]
-    CU3 --> CU3_4[Ver Estado de Solicitud]
+    CU3 --> CU3_1[Solicitar Recuperación]
+    CU3 --> CU2[Recibir Email con Token]
+    CU3 --> CU3_3[Restablecer Contraseña]
     
-    CU4 --> CU4_1[Ver Lista de Inscripciones]
-    CU4 --> CU4_2[Ver Estado Pendiente]
-    CU4 --> CU4_3[Ver Estado Aprobado]
-    CU4 --> CU4_4[Ver Estado Rechazado]
-    CU4 --> CU4_5[Ver Notas de Revisión]
+    CU4 --> CU4_1[Ver Clases Disponibles]
+    CU4 --> CU4_2[Seleccionar Clase]
+    CU4 --> CU4_3[Solicitar Inscripción]
+    CU4 --> CU4_4[Ver Estado de Solicitud]
     
-    CU5 --> CU5_1[Seleccionar Documento]
-    CU5 --> CU5_2[Subir Archivo PDF]
-    CU5 --> CU5_3[Confirmar Envío]
+    CU5 --> CU5_1[Ver Lista de Inscripciones]
+    CU5 --> CU5_2[Ver Estado Pendiente]
+    CU5 --> CU5_3[Ver Estado Aprobado]
+    CU5 --> CU5_4[Ver Estado Rechazado]
+    CU5 --> CU5_5[Ver Notas de Revisión]
+    CU5 --> CU5_6[Ver Clasificación Académica]
     
-    CU6 --> CU6_1[Ver Documentos Enviados]
-    CU6 --> CU6_2[Ver Estado Pendiente]
-    CU6 --> CU6_3[Ver Estado Aprobado]
-    CU6 --> CU6_4[Ver Estado Rechazado]
+    CU6 --> CU6_1[Seleccionar Documento]
+    CU6 --> CU6_2[Subir Archivo PDF]
+    CU6 --> CU6_3[Confirmar Envío]
+    
+    CU7 --> CU7_1[Ver Documentos Enviados]
+    CU7 --> CU7_2[Ver Estado Pendiente]
+    CU7 --> CU7_3[Ver Estado Aprobado]
+    CU7 --> CU7_4[Ver Estado Rechazado]
+    
+    CU8 --> CU8_1[Ver Planilla de Inscripción]
+    CU8 --> CU8_2[Descargar PDF]
+    CU8 --> CU8_3[Imprimir Planilla]
 ```
 
 ## Diagramas de Flujo (Lógica Principal)

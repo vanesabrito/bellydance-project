@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 export const dynamic = 'force-dynamic';
 
-function generateTemporaryPassword(): string {
-  const length = 12;
-  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-  let password = "";
-  for (let i = 0; i < length; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
-  }
-  return password;
+function generateResetToken(): string {
+  return crypto.randomBytes(32).toString('hex');
 }
 
 export async function POST(req: Request) {
@@ -38,30 +32,36 @@ export async function POST(req: Request) {
       // Por seguridad, no revelamos si el email existe o no
       return NextResponse.json({ 
         ok: true, 
-        message: "Si el email existe en nuestro sistema, se enviará una contraseña provisional" 
+        message: "Si el email existe en nuestro sistema, se enviará un enlace de recuperación" 
       });
     }
 
-    // Generar contraseña provisional
-    const temporaryPassword = generateTemporaryPassword();
-    const hash = await bcrypt.hash(temporaryPassword, 10);
+    // Generar token de recuperación
+    const resetToken = generateResetToken();
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hora de expiración
 
-    // Actualizar contraseña del usuario
+    // Actualizar usuario con el token
     await prisma.user.update({
       where: { id: user.id },
-      data: { password: hash },
+      data: { 
+        resetToken,
+        resetTokenExpires,
+      },
     });
 
-    // Aquí se debería enviar el email con la contraseña provisional
-    // Por ahora, simulamos el envío mostrando la contraseña en la respuesta
+    // Generar enlace de recuperación
+    const resetLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+
+    // Aquí se debería enviar el email con el enlace de recuperación
+    // Por ahora, simulamos el envío mostrando el enlace en la respuesta
     // En producción, esto debería ser reemplazado por un servicio de email real
-    console.log(`Contraseña provisional para ${email}: ${temporaryPassword}`);
+    console.log(`Enlace de recuperación para ${email}: ${resetLink}`);
 
     return NextResponse.json({ 
       ok: true, 
-      message: "Se ha enviado una contraseña provisional a tu correo electrónico",
+      message: "Se ha enviado un enlace de recuperación a tu correo electrónico",
       // Solo para desarrollo - en producción eliminar este campo
-      temporaryPassword: temporaryPassword 
+      resetLink: resetLink 
     });
   } catch (err: any) {
     console.error(err);

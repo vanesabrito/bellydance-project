@@ -16,12 +16,14 @@ export default function RecoverPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [resetLink, setResetLink] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setResetLink(null);
 
     // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,13 +42,14 @@ export default function RecoverPasswordPage() {
       const json = await res.json();
       
       if (json.ok) {
-        const message = json.temporaryPassword 
-          ? `Contraseña provisional: ${json.temporaryPassword}`
-          : "Se ha enviado una contraseña provisional a tu correo electrónico";
-        setSuccess(message);
+        setSuccess("Se ha enviado un enlace de recuperación a tu correo electrónico");
         setEmail("");
+        // Solo para desarrollo - mostrar el enlace
+        if (json.resetLink) {
+          setResetLink(json.resetLink);
+        }
       } else {
-        setError(json.error || "No se pudo recuperar la contraseña");
+        setError(json.error || "No se pudo enviar el enlace de recuperación");
       }
     } catch (err: any) {
       setError(err?.message || "Error de conexión");
@@ -72,7 +75,7 @@ export default function RecoverPasswordPage() {
           color="text.secondary"
           sx={{ textAlign: "center", mb: 3 }}
         >
-          Ingresa tu correo electrónico para recibir una contraseña provisional
+          Ingresa tu correo electrónico para recibir un enlace de recuperación
         </Typography>
         <Box
           component="form"
@@ -103,9 +106,21 @@ export default function RecoverPasswordPage() {
               },
             }}
           >
-            {loading ? "Enviando..." : "Enviar contraseña provisional"}
+            {loading ? "Enviando..." : "Enviar enlace de recuperación"}
           </Button>
         </Box>
+        {resetLink && (
+          <Box sx={{ mt: 3, p: 2, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+              Enlace de recuperación (solo para desarrollo):
+            </Typography>
+            <Typography variant="body2" sx={{ wordBreak: "break-all", color: "#1976d2" }}>
+              <a href={resetLink} target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>
+                {resetLink}
+              </a>
+            </Typography>
+          </Box>
+        )}
         <Box sx={{ mt: 3, textAlign: "center" }}>
           <Link href="/login" style={{ textDecoration: "none", color: "#ec407a" }}>
             Volver a iniciar sesión

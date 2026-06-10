@@ -51,23 +51,6 @@ export default function Sidebar() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box
-        sx={{
-          mb: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Image
-          src="/logo-bellydance-project.png"
-          alt="Logo Bellydance Project"
-          width={200}
-          height={200}
-          priority
-          style={{ objectFit: "contain", width: "200px", height: "200px" }}
-        />
-      </Box>
       <List>
         {/* Dashboard - visible when session exists */}
         {session && (
@@ -214,6 +197,20 @@ export default function Sidebar() {
                 <ListItemText primary="Control de Asistencias" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/enrolled-students"
+                selected={isSelected("/admin/enrolled-students")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Lista de Alumnas Inscritas" />
+              </ListItemButton>
+            </ListItem>
           </>
         )}
 
@@ -246,6 +243,20 @@ export default function Sidebar() {
                   <FactCheckIcon />
                 </ListItemIcon>
                 <ListItemText primary="Gestionar Inscripciones" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/enrolled-students"
+                selected={isSelected("/admin/enrolled-students")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Lista de Alumnas Inscritas" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
