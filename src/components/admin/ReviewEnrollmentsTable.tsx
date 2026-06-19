@@ -17,6 +17,11 @@ import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 import { statusLabel, statusChipColor } from "@/utils/status";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 
@@ -26,8 +31,16 @@ type Enrollment = {
   status: "PENDING" | "APPROVED" | "REJECTED";
   reviewNote?: string | null;
   createdAt: string;
-  student?: { email?: string | null } | null;
+  student?: { email?: string | null; id?: string } | null;
   reviewedAt?: string | null;
+};
+
+type Payment = {
+  id: string;
+  studentId: string;
+  amount: number;
+  paymentType: string;
+  paymentDate: string;
 };
 
 type ReviewEnrollmentsTableProps = {
@@ -47,6 +60,9 @@ export default function ReviewEnrollmentsTable({
   const [toDate, setToDate] = useState(""); // yyyy-MM-dd
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingEnrollment, setPendingEnrollment] = useState<Enrollment | null>(null);
   const isPendingOnly = statusFilter === "PENDING";
 
   const loadEnrollments = useCallback(async () => {
@@ -67,13 +83,50 @@ export default function ReviewEnrollmentsTable({
     }
   }, []);
 
+  const loadPayments = useCallback(async () => {
+    try {
+      const res = await fetch("/api/payments", { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}`);
+      }
+      const json = (await res.json()) as { ok?: boolean; payments?: Payment[] };
+      setPayments(json.payments ?? []);
+    } catch (err) {
+      console.error("Error loading payments:", err);
+    }
+  }, []);
+
   useEffect(() => {
     loadEnrollments();
-  }, [loadEnrollments]);
+    loadPayments();
+  }, [loadEnrollments, loadPayments]);
 
   useRefreshOnFocus(loadEnrollments);
 
+  const getPaymentStatus = (enrollment: Enrollment): "PAGADO" | "PENDIENTE" => {
+    if (!enrollment.student?.id) return "PENDIENTE";
+    const hasPayment = payments.some(p => p.studentId === enrollment.student!.id);
+    return hasPayment ? "PAGADO" : "PENDIENTE";
+  };
+
+  const getPaymentStatusColor = (status: "PAGADO" | "PENDIENTE") => {
+    return status === "PAGADO" ? "success" : "error";
+  };
+
   const handleAction = async (id: string, status: Enrollment["status"]) => {
+    const enrollment = enrollments.find(e => e.id === id);
+    if (!enrollment) return;
+
+    // Check payment status before approving
+    if (status === "APPROVED") {
+      const paymentStatus = getPaymentStatus(enrollment);
+      if (paymentStatus === "PENDIENTE") {
+        setPendingEnrollment(enrollment);
+        setConfirmDialogOpen(true);
+        return;
+      }
+    }
+
     const reviewNote = notes[id];
     setError(null);
     try {
@@ -98,6 +151,39 @@ export default function ReviewEnrollmentsTable({
       }
     } catch (err) {
       setError("No pudimos actualizar la inscripción. Intenta nuevamente.");
+    }
+  };
+
+  const handleConfirmApproval = async () => {
+    if (!pendingEnrollment) return;
+    
+    const reviewNote = notes[pendingEnrollment.id];
+    setError(null);
+    try {
+      const res = await fetch(`/api/enrollments/${pendingEnrollment.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "APPROVED", reviewNote }),
+      });
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}`);
+      }
+      const json = await res.json();
+      if (json.ok) {
+        setEnrollments((prev) =>
+          prev.map((d) => (d.id === pendingEnrollment.id ? { ...d, status: "APPROVED", reviewNote } : d))
+        );
+        setNotes((prev) => {
+          const { [pendingEnrollment.id]: _removed, ...rest } = prev;
+          return rest;
+        });
+        await loadEnrollments();
+      }
+    } catch (err) {
+      setError("No pudimos actualizar la inscripción. Intenta nuevamente.");
+    } finally {
+      setConfirmDialogOpen(false);
+      setPendingEnrollment(null);
     }
   };
 
@@ -218,6 +304,7 @@ export default function ReviewEnrollmentsTable({
               <TableCell>Clase</TableCell>
               <TableCell>Alumno</TableCell>
               <TableCell>Estado</TableCell>
+              <TableCell>Estado de Pago</TableCell>
               <TableCell>Nota</TableCell>
               <TableCell>Acciones</TableCell>
             </TableRow>
@@ -232,6 +319,13 @@ export default function ReviewEnrollmentsTable({
                     size="small"
                     label={statusLabel(d.status)}
                     color={statusChipColor(d.status)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    label={getPaymentStatus(d)}
+                    color={getPaymentStatusColor(getPaymentStatus(d))}
                   />
                 </TableCell>
                 <TableCell>
@@ -269,7 +363,7 @@ export default function ReviewEnrollmentsTable({
             ))}
             {enrollments.length === 0 && !isLoading && (
               <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={6}>
                   No hay inscripciones para revisar.
                 </TableCell>
               </TableRow>
@@ -277,6 +371,22 @@ export default function ReviewEnrollmentsTable({
           </TableBody>
         </Table>
       </Paper>
+      
+      <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)}>
+        <DialogTitle>Advertencia: Pago Pendiente</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            La alumna {pendingEnrollment?.student?.email} no tiene ningún pago registrado en el sistema.
+            ¿Estás seguro de que deseas aprobar esta inscripción?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialogOpen(false)}>Cancelar</Button>
+          <Button onClick={handleConfirmApproval} variant="contained" color="primary">
+            Confirmar Aprobación
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

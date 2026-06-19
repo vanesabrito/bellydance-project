@@ -25,11 +25,33 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import CheckroomIcon from "@mui/icons-material/Checkroom";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import DescriptionIcon from "@mui/icons-material/Description";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 
 export default function Sidebar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const role = (session as any)?.user?.role ?? "GUEST";
+
+  const getUserName = () => {
+    const user = (session as any)?.user;
+    if (!user) return "Mi Perfil";
+    
+    // Para administrador, mostrar solo "Administrador"
+    if (role === "ADMIN") {
+      return "Administrador";
+    }
+    
+    const nombre = user.nombre;
+    const apellido = user.apellido;
+    
+    if (nombre && apellido) {
+      return `${nombre} ${apellido}`;
+    } else if (nombre) {
+      return nombre;
+    } else {
+      return "Mi Perfil";
+    }
+  };
 
   const isSelected = (href: string) => {
     if (!pathname) return false;
@@ -65,7 +87,7 @@ export default function Sidebar() {
               <ListItemIcon>
                 <DashboardIcon />
               </ListItemIcon>
-              <ListItemText primary="Dashboard" />
+              <ListItemText primary={getUserName()} />
             </ListItemButton>
           </ListItem>
         )}
@@ -163,6 +185,20 @@ export default function Sidebar() {
                 <ListItemText primary="Vestuarios" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/instructor/schedules"
+                selected={isSelected("/instructor/schedules")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <ScheduleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Visualizar Horarios" />
+              </ListItemButton>
+            </ListItem>
           </>
         )}
 
@@ -208,7 +244,21 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <SchoolIcon />
                 </ListItemIcon>
-                <ListItemText primary="Lista de Alumnas Inscritas" />
+                <ListItemText primary="Visualizar Lista de Alumnas por Categorias" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/schedules"
+                selected={isSelected("/directora/schedules")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <ScheduleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Visualizar Horarios" />
               </ListItemButton>
             </ListItem>
           </>
@@ -228,7 +278,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary="Registrar Usuarios" />
+                <ListItemText primary="Gestionar Usuarios" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -256,7 +306,21 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <SchoolIcon />
                 </ListItemIcon>
-                <ListItemText primary="Lista de Alumnas Inscritas" />
+                <ListItemText primary="Gestionar Lista de Alumnas por Categorias" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/schedules"
+                selected={isSelected("/admin/schedules")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <ScheduleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Horarios" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -270,7 +334,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <DescriptionIcon />
                 </ListItemIcon>
-                <ListItemText primary="Documentos" />
+                <ListItemText primary="Gestionar Documentos" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -284,7 +348,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <AttachMoneyIcon />
                 </ListItemIcon>
-                <ListItemText primary="Control de Pagos" />
+                <ListItemText primary="Gestionar Pagos" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

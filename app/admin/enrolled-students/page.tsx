@@ -363,7 +363,20 @@ export default function EnrolledStudentsPage() {
 
       {/* Groups */}
       {groupedStudents && (
-        <Grid container spacing={3}>
+        <>
+          {/* Check if no results after filtering */}
+          {counts && counts.total === 0 && (searchTerm || filterAgeCategory || filterAcademicLevel) && (
+            <Paper sx={{ p: 4, mb: 4, borderRadius: 3, textAlign: "center" }} elevation={3}>
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+                No existen registros que coincidan con los criterios ingresados
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Intenta con otros filtros o limpia los criterios de búsqueda
+              </Typography>
+            </Paper>
+          )}
+
+          <Grid container spacing={3}>
           {/* Mini Bellydance */}
           <Grid item xs={12}>
             <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: "#2196f3" }}>
@@ -442,6 +455,7 @@ export default function EnrolledStudentsPage() {
             </Grid>
           </Grid>
         </Grid>
+        </>
       )}
 
       {/* Update Level Dialog */}

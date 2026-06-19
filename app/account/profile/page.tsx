@@ -152,6 +152,9 @@ export default function ProfilePage() {
               src={userPhoto}
               alt={fullName}
               sx={{ width: 100, height: 100, mr: 3, border: "3px solid #ec407a" }}
+              imgProps={{
+                style: { objectFit: 'cover' }
+              }}
             >
               {!userPhoto && <AccountCircleIcon sx={{ fontSize: 60 }} />}
             </Avatar>

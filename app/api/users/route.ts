@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   }
 
   const whereClause = roleFilter ? { role: roleFilter } : {};
-  const selectFields = roleFilter === "ALUMNA" 
+  const selectFields = roleFilter === "ALUMNA" || roleFilter === "PROFESORA"
     ? { id: true, email: true, role: true, nombre: true, apellido: true, createdAt: true }
     : { id: true, email: true, role: true, createdAt: true };
 
@@ -35,6 +35,66 @@ export async function GET(req: Request) {
   } as any);
 
   return NextResponse.json({ ok: true, users });
+}
+
+// PUT - Actualizar un usuario existente
+export async function PUT(req: Request) {
+  try {
+    const session: any = await getServerSession(authOptions as any);
+    if (!session)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (session.user?.role !== "ADMIN")
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const body = await req.json();
+    const { id, nombre, apellido, cedula, email, fechaNacimiento, edad, direccion, password, role } = body;
+    
+    if (!id)
+      return NextResponse.json({ error: "ID del usuario es requerido" }, { status: 400 });
+    
+    if (!email || !role)
+      return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
+    
+    // Verificar si el email ya está en uso por otro usuario
+    const existingEmail = await prisma.user.findFirst({ where: { email, NOT: { id } } });
+    if (existingEmail)
+      return NextResponse.json({ error: "Email ya está en uso" }, { status: 409 });
+    
+    if (cedula) {
+      const existingCedula = await prisma.user.findFirst({ where: { cedula, NOT: { id } } });
+      if (existingCedula)
+        return NextResponse.json({ error: "Cédula ya está en uso" }, { status: 409 });
+    }
+    
+    const updateData: any = {
+      email,
+      role,
+      nombre: nombre || null,
+      apellido: apellido || null,
+      cedula: cedula || null,
+      fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
+      edad: edad ? parseInt(edad) : null,
+      direccion: direccion || null
+    };
+    
+    // Solo actualizar la contraseña si se proporciona una nueva
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+    
+    const user = await prisma.user.update({
+      where: { id },
+      data: updateData,
+    });
+    
+    return NextResponse.json({
+      ok: true,
+      user: { id: user.id, email: user.email, role: user.role },
+    });
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json({ error: "Error del servidor" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
@@ -49,7 +109,7 @@ export async function POST(req: Request) {
     const { nombre, apellido, cedula, email, fechaNacimiento, edad, direccion, password, role } = body;
     
     if (!email || !password || !role)
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
     
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail)

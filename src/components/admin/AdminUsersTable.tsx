@@ -22,6 +22,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
 import { roleLabel } from "@/utils/roles";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 
@@ -37,11 +39,13 @@ export default function AdminUsersTable() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
+    id: "",
     nombre: "",
     apellido: "",
     cedula: "",
@@ -78,9 +82,11 @@ export default function AdminUsersTable() {
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
+    setEditingUser(null);
     setFormError(null);
     setSuccess(null);
     setFormData({
+      id: "",
       nombre: "",
       apellido: "",
       cedula: "",
@@ -104,8 +110,10 @@ export default function AdminUsersTable() {
     setSuccess(null);
 
     try {
+      const isEditing = !!formData.id;
+      const method = isEditing ? "PUT" : "POST";
       const res = await fetch("/api/users", {
-        method: "POST",
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -116,20 +124,39 @@ export default function AdminUsersTable() {
       const json = await res.json();
 
       if (json.ok) {
-        setSuccess("Usuario creado exitosamente");
+        setSuccess(isEditing ? "Usuario actualizado exitosamente" : "Usuario creado exitosamente");
         loadUsers();
         setTimeout(() => {
           handleCloseDialog();
           setSuccess(null);
         }, 1000);
       } else {
-        setFormError(json.error || "Error al crear usuario");
+        setFormError(json.error || "Error al guardar usuario");
       }
     } catch (err) {
       setFormError("Error de red");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEdit = (user: AdminUser) => {
+    setEditingUser(user);
+    setFormError(null);
+    setSuccess(null);
+    setFormData({
+      id: user.id,
+      nombre: "",
+      apellido: "",
+      cedula: "",
+      email: user.email,
+      fechaNacimiento: "",
+      edad: "",
+      direccion: "",
+      password: "",
+      role: user.role,
+    });
+    setOpenDialog(true);
   };
 
   return (
@@ -175,6 +202,7 @@ export default function AdminUsersTable() {
               <TableCell>Email</TableCell>
               <TableCell>Rol</TableCell>
               <TableCell>Fecha de alta</TableCell>
+              <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -189,11 +217,20 @@ export default function AdminUsersTable() {
                   />
                 </TableCell>
                 <TableCell>{new Date(u.createdAt).toLocaleString()}</TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleEdit(u)}
+                    color="primary"
+                    title="Editar Usuario"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             {users.length === 0 && !isLoading && (
               <TableRow>
-                <TableCell colSpan={3}>No hay usuarios.</TableCell>
+                <TableCell colSpan={4}>No hay usuarios.</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -201,7 +238,7 @@ export default function AdminUsersTable() {
       </Paper>
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>Registrar Nuevo Usuario</DialogTitle>
+        <DialogTitle>{editingUser ? "Editar Usuario" : "Registrar Nuevo Usuario"}</DialogTitle>
         <DialogContent>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
             <TextField
@@ -268,7 +305,8 @@ export default function AdminUsersTable() {
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               fullWidth
               margin="normal"
-              required
+              required={!editingUser}
+              helperText={editingUser ? "Dejar en blanco para mantener la contraseña actual" : ""}
             />
             <FormControl fullWidth margin="normal" required>
               <InputLabel>Rol</InputLabel>
@@ -302,7 +340,7 @@ export default function AdminUsersTable() {
             Cancelar
           </Button>
           <Button onClick={handleSubmit} variant="contained" disabled={isSubmitting}>
-            {isSubmitting ? "Guardando..." : "Guardar"}
+            {isSubmitting ? "Guardando..." : (editingUser ? "Actualizar" : "Guardar")}
           </Button>
         </DialogActions>
       </Dialog>

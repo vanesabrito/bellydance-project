@@ -20,6 +20,10 @@ import TableRow from "@mui/material/TableRow";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import PaymentReceiptView from "@/components/admin/payments/PaymentReceiptView";
 
 interface Payment {
   id: string;
@@ -34,6 +38,12 @@ interface Payment {
   paymentType: string;
   referenceNumber?: string | null;
   bank?: string | null;
+  receipt?: {
+    id: string;
+    receiptNumber: string;
+    issueDate: string;
+    payment: any;
+  };
   createdAt: string;
 }
 
@@ -49,7 +59,11 @@ export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
   const [formData, setFormData] = useState({
+    id: "",
     studentId: "",
     paymentDate: new Date().toISOString().split('T')[0],
     amount: "",
@@ -90,20 +104,24 @@ export default function AdminPaymentsPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.studentId || !formData.amount || !formData.paymentType) return setError("Estudiante, monto y tipo de pago son requeridos");
+    if (!formData.studentId || !formData.amount || !formData.paymentType) return setError("Alumna, monto y tipo de pago son requeridos");
     setLoading(true);
     setError(null);
     try {
+      const isEditing = !!formData.id;
+      const method = isEditing ? "PUT" : "POST";
       const res = await fetch("/api/payments", {
-        method: "POST",
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const json = await res.json();
       if (json.ok) {
-        setSuccess("Pago registrado correctamente");
+        setSuccess(isEditing ? "Pago actualizado correctamente" : "Pago registrado correctamente");
         setOpen(false);
+        setEditingPayment(null);
         setFormData({
+          id: "",
           studentId: "",
           paymentDate: new Date().toISOString().split('T')[0],
           amount: "",
@@ -122,6 +140,34 @@ export default function AdminPaymentsPage() {
     }
   }
 
+  const handleEdit = (payment: Payment) => {
+    setEditingPayment(payment);
+    setFormData({
+      id: payment.id,
+      studentId: payment.student.id,
+      paymentDate: payment.paymentDate.split('T')[0],
+      amount: payment.amount.toString(),
+      paymentType: payment.paymentType,
+      referenceNumber: payment.referenceNumber || "",
+      bank: payment.bank || "",
+    });
+    setOpen(true);
+  };
+
+  const handleOpenDialog = () => {
+    setEditingPayment(null);
+    setFormData({
+      id: "",
+      studentId: "",
+      paymentDate: new Date().toISOString().split('T')[0],
+      amount: "",
+      paymentType: "",
+      referenceNumber: "",
+      bank: "",
+    });
+    setOpen(true);
+  };
+
   if (!session) return <p>Debes iniciar sesión.</p>;
   if ((session as any)?.user?.role !== "ADMIN") return <p>No tienes permiso para acceder a esta página.</p>;
 
@@ -132,7 +178,7 @@ export default function AdminPaymentsPage() {
           <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
             Control de Pagos
           </Typography>
-          <Button variant="contained" onClick={() => setOpen(true)}>
+          <Button variant="contained" onClick={handleOpenDialog}>
             Registrar Pago
           </Button>
         </Box>
@@ -146,6 +192,8 @@ export default function AdminPaymentsPage() {
               <TableCell>Tipo de Pago</TableCell>
               <TableCell>Referencia</TableCell>
               <TableCell>Banco</TableCell>
+              <TableCell>Recibo</TableCell>
+              <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -167,18 +215,43 @@ export default function AdminPaymentsPage() {
                 </TableCell>
                 <TableCell>{payment.referenceNumber || "—"}</TableCell>
                 <TableCell>{payment.bank || "—"}</TableCell>
+                <TableCell>
+                  {payment.receipt ? (
+                    <IconButton
+                      onClick={() => {
+                        setSelectedReceipt(payment.receipt);
+                        setReceiptOpen(true);
+                      }}
+                      color="primary"
+                      title="Ver Recibo"
+                    >
+                      <VisibilityIcon />
+                    </IconButton>
+                  ) : (
+                    <span style={{ color: "#999", fontSize: "0.875rem" }}>No disponible</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleEdit(payment)}
+                    color="primary"
+                    title="Editar Pago"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             {payments.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6}>No hay pagos registrados aún.</TableCell>
+                <TableCell colSpan={8}>No hay pagos registrados aún.</TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
 
         <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Registrar Pago</DialogTitle>
+          <DialogTitle>{editingPayment ? "Editar Pago" : "Registrar Pago"}</DialogTitle>
           <DialogContent>
             <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2, mt: 2 }}>
               <TextField
@@ -242,7 +315,7 @@ export default function AdminPaymentsPage() {
           <DialogActions>
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
             <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-              {loading ? "Registrando..." : "Registrar"}
+              {loading ? (editingPayment ? "Actualizando..." : "Registrando...") : (editingPayment ? "Actualizar" : "Registrar")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -258,6 +331,12 @@ export default function AdminPaymentsPage() {
             {success}
           </Alert>
         </Snackbar>
+
+        <PaymentReceiptView
+          open={receiptOpen}
+          onClose={() => setReceiptOpen(false)}
+          receipt={selectedReceipt}
+        />
       </Paper>
     </Container>
   );

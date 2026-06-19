@@ -52,10 +52,8 @@ export default function Home() {
             priority
             style={{
               objectFit: "cover",
-              width: "240px",
-              height: "240px",
-              marginTop: "-20px",
-              marginLeft: "-20px",
+              width: "100%",
+              height: "100%",
             }}
           />
         </Box>

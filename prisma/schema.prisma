@@ -30,6 +30,9 @@ model User {
   costumes        Costume[] @relation("CostumeInstructor")
   choreographies  Choreography[] @relation("ChoreographyInstructor")
   choreographyParticipations ChoreographyParticipant[]
+  documents       Document[]
+  registeredDocuments Document[] @relation("RegisteredDocuments")
+  classSchedules  ClassSchedule[] @relation("ClassScheduleInstructor")
   createdAt       DateTime @default(now())
 
   @@unique([cedula], name: "User_cedula_key")
@@ -122,7 +125,37 @@ model Payment {
   paymentType     PaymentType
   referenceNumber String?
   bank            String?
+  receipt         PaymentReceipt?
   createdAt       DateTime @default(now())
+}
+
+model PaymentReceipt {
+  id             String   @id @default(cuid())
+  receiptNumber  String   @unique
+  payment        Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId      String   @unique
+  issueDate      DateTime @default(now())
+  status         String   @default("PAGADO")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Document {
+  id              String   @id @default(cuid())
+  student         User     @relation(fields: [studentId], references: [id])
+  studentId       String
+  type            DocumentType
+  description     String?
+  fileUrl         String?
+  receivedDate    DateTime @default(now())
+  deliveryDate    DateTime?
+  status          DocumentStatus
+  observations    String?
+  registeredBy    User     @relation("RegisteredDocuments", fields: [registeredById], references: [id])
+  registeredById  String
+  paymentId       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Costume {
@@ -168,6 +201,22 @@ model ChoreographyParticipant {
   createdAt      DateTime     @default(now())
 
   @@unique([choreographyId, studentId])
+}
+
+model ClassSchedule {
+  id          String      @id @default(cuid())
+  category    AgeCategory
+  month       Month
+  day         DayOfWeek
+  time        String      // HH:MM format
+  classroom   String
+  instructor  User        @relation("ClassScheduleInstructor", fields: [instructorId], references: [id])
+  instructorId String
+  academicLevel AcademicLevel?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([instructorId, day, time], name: "Unique_instructor_day_time")
 }
 
 enum Role {
@@ -223,4 +272,37 @@ enum AgeCategory {
   MINI_BELLYDANCE
   BELLYDANCE_ADOLESCENTES
   BELLYDANCE_ADULTAS
+}
+
+enum Month {
+  ENERO
+  FEBRERO
+  MARZO
+  ABRIL
+  MAYO
+  JUNIO
+  JULIO
+  AGOSTO
+  SEPTIEMBRE
+  OCTUBRE
+  NOVIEMBRE
+  DICIEMBRE
+}
+
+enum DocumentType {
+  PLANILLA_INSCRIPCION
+  CEDULA_IDENTIDAD
+  FOTO_CARNET
+  CONSTANCIA_INSCRIPCION
+  RECIBO_PAGO
+  CERTIFICADO
+  OTRO
+}
+
+enum DocumentStatus {
+  RECIBIDO
+  EN_REVISION
+  APROBADO
+  RECHAZADO
+  ENTREGADO
 }

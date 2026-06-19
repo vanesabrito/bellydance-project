@@ -70,6 +70,9 @@ export default function UserMenu() {
           src={userPhoto}
           alt={userName}
           sx={{ width: 40, height: 40 }}
+          imgProps={{
+            style: { objectFit: 'cover' }
+          }}
         >
           {!userPhoto && <AccountCircleIcon />}
         </Avatar>
