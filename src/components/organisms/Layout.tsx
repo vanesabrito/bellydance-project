@@ -24,16 +24,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         {showSidebar && (
           <AppBar
-            position="static"
+            position="sticky"
             elevation={0}
             sx={{
               bgcolor: "#ec407a",
               width: "100%",
               left: 0,
               right: 0,
+              top: 0,
               px: 0,
               m: 0,
               flexShrink: 0,
+              zIndex: 1100,
             }}
           >
             <Toolbar sx={{ justifyContent: "flex-end", width: "100%", px: 0, mx: 0 }}>
@@ -49,7 +51,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Sidebar />
             </Box>
           )}
-          <Box component="main" sx={{ flex: 1, p: showSidebar ? 3 : 0, width: "100%" }}>
+          <Box component="main" sx={{ flex: 1, p: showSidebar ? 3 : 0, width: "100%", pt: showSidebar ? 8 : 0 }}>
             {children}
           </Box>
         </Box>

@@ -106,7 +106,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <UploadFileIcon />
                 </ListItemIcon>
-                <ListItemText primary="Inscribirse" />
+                <ListItemText primary="Solicitar Inscripción" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -134,7 +134,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <DescriptionIcon />
                 </ListItemIcon>
-                <ListItemText primary="Planilla de Inscripción" />
+                <ListItemText primary="Gestionar Planilla de Inscripción" />
               </ListItemButton>
             </ListItem>
           </>
@@ -154,7 +154,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <SchoolIcon />
                 </ListItemIcon>
-                <ListItemText primary="Mis Clases" />
+                <ListItemText primary="Gestionar Clases" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -168,7 +168,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <MusicNoteIcon />
                 </ListItemIcon>
-                <ListItemText primary="Coreografías" />
+                <ListItemText primary="Gestionar Coreografías" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -182,7 +182,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <CheckroomIcon />
                 </ListItemIcon>
-                <ListItemText primary="Vestuarios" />
+                <ListItemText primary="Gestionar Vestuarios" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -230,21 +230,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <FactCheckIcon />
                 </ListItemIcon>
-                <ListItemText primary="Control de Asistencias" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                component={Link}
-                href="/admin/enrolled-students"
-                selected={isSelected("/admin/enrolled-students")}
-                disableRipple
-                sx={itemSx}
-              >
-                <ListItemIcon>
-                  <SchoolIcon />
-                </ListItemIcon>
-                <ListItemText primary="Visualizar Lista de Alumnas por Categorias" />
+                <ListItemText primary="Gestionar Asistencias" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

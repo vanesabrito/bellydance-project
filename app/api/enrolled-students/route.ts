@@ -16,7 +16,11 @@ export async function GET(req: Request) {
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")
+  
+  // Si es profesora, permitir acceso pero filtrar por sus clases
+  if (session.user?.role === "PROFESORA") {
+    // Profesora puede ver sus propias alumnas
+  } else if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -28,6 +32,13 @@ export async function GET(req: Request) {
     const where: any = {
       status: "APPROVED",
     };
+
+    // Si es profesora, filtrar por sus clases
+    if (session.user?.role === "PROFESORA") {
+      where.class = {
+        instructorId: session.user.id,
+      };
+    }
 
     if (searchTerm) {
       where.student = {

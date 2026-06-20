@@ -52,15 +52,12 @@ export async function POST(req: Request) {
     // Generar enlace de recuperación
     const resetLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 
-    // Aquí se debería enviar el email con el enlace de recuperación
-    // Por ahora, simulamos el envío mostrando el enlace en la respuesta
-    // En producción, esto debería ser reemplazado por un servicio de email real
+    // Mostrar el enlace en la respuesta para desarrollo sin servicio de email
     console.log(`Enlace de recuperación para ${email}: ${resetLink}`);
 
     return NextResponse.json({ 
       ok: true, 
-      message: "Se ha enviado un enlace de recuperación a tu correo electrónico",
-      // Solo para desarrollo - en producción eliminar este campo
+      message: "Se ha generado un enlace de recuperación",
       resetLink: resetLink 
     });
   } catch (err: any) {

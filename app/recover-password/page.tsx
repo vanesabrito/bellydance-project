@@ -42,9 +42,9 @@ export default function RecoverPasswordPage() {
       const json = await res.json();
       
       if (json.ok) {
-        setSuccess("Se ha enviado un enlace de recuperación a tu correo electrónico");
+        setSuccess("Se ha generado un enlace de recuperación");
         setEmail("");
-        // Solo para desarrollo - mostrar el enlace
+        // Mostrar el enlace para desarrollo sin servicio de email
         if (json.resetLink) {
           setResetLink(json.resetLink);
         }
@@ -75,7 +75,7 @@ export default function RecoverPasswordPage() {
           color="text.secondary"
           sx={{ textAlign: "center", mb: 3 }}
         >
-          Ingresa tu correo electrónico para recibir un enlace de recuperación
+          Ingresa tu correo electrónico para generar un enlace de recuperación
         </Typography>
         <Box
           component="form"
@@ -110,14 +110,17 @@ export default function RecoverPasswordPage() {
           </Button>
         </Box>
         {resetLink && (
-          <Box sx={{ mt: 3, p: 2, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-              Enlace de recuperación (solo para desarrollo):
+          <Box sx={{ mt: 3, p: 3, backgroundColor: "#e3f2fd", borderRadius: 2, border: "1px solid #2196f3" }}>
+            <Typography variant="subtitle1" color="#1976d2" sx={{ fontWeight: 600, mb: 1 }}>
+              Enlace de recuperación generado:
             </Typography>
-            <Typography variant="body2" sx={{ wordBreak: "break-all", color: "#1976d2" }}>
-              <a href={resetLink} target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>
+            <Typography variant="body2" sx={{ wordBreak: "break-all", mb: 2 }}>
+              <a href={resetLink} style={{ color: "#1976d2", fontWeight: 500 }}>
                 {resetLink}
               </a>
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Haz clic en el enlace para restablecer tu contraseña. Este enlace expirará en 1 hora.
             </Typography>
           </Box>
         )}

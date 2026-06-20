@@ -24,6 +24,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { roleLabel } from "@/utils/roles";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 
@@ -43,6 +44,10 @@ export default function AdminUsersTable() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     id: "",
@@ -159,6 +164,53 @@ export default function AdminUsersTable() {
     setOpenDialog(true);
   };
 
+  const handleDeleteClick = (user: AdminUser) => {
+    setUserToDelete(user);
+    setDeleteError(null);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const res = await fetch(`/api/users?id=${userToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      const json = await res.json();
+
+      if (json.ok) {
+        setSuccess("Usuario eliminado correctamente");
+        loadUsers();
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+        setTimeout(() => {
+          setSuccess(null);
+        }, 2000);
+      } else {
+        if (json.dependencies && json.dependencies.length > 0) {
+          setDeleteError(`${json.message}\n\nDependencias encontradas:\n${json.dependencies.join("\n")}`);
+        } else {
+          setDeleteError(json.error || "Error al eliminar usuario");
+        }
+      }
+    } catch (err) {
+      setDeleteError("Error de red al eliminar usuario");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setUserToDelete(null);
+    setDeleteError(null);
+  };
+
   return (
     <Container maxWidth="md" sx={{ mt: 8 }}>
       <Paper sx={{ p: 4, borderRadius: 3 }} elevation={6}>
@@ -224,6 +276,13 @@ export default function AdminUsersTable() {
                     title="Editar Usuario"
                   >
                     <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDeleteClick(u)}
+                    color="error"
+                    title="Eliminar Usuario"
+                  >
+                    <DeleteIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -341,6 +400,34 @@ export default function AdminUsersTable() {
           </Button>
           <Button onClick={handleSubmit} variant="contained" disabled={isSubmitting}>
             {isSubmitting ? "Guardando..." : (editingUser ? "Actualizar" : "Guardar")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de confirmación de eliminación */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel} maxWidth="sm" fullWidth>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            ¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.
+          </Typography>
+          {userToDelete && (
+            <Typography variant="body2" color="text.secondary">
+              Usuario: {userToDelete.email}
+            </Typography>
+          )}
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} disabled={isDeleting}>
+            Cancelar
+          </Button>
+          <Button onClick={handleDeleteConfirm} variant="contained" color="error" disabled={isDeleting}>
+            {isDeleting ? "Eliminando..." : "Eliminar"}
           </Button>
         </DialogActions>
       </Dialog>
