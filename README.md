@@ -1,10 +1,20 @@
 # Bellydance Project - Gestión de Academia de Baile
 
-Aplicación en **Next.js 14 (App Router)** + **TypeScript** para gestionar **inscripciones y clases** en la academia de baile Bellydance Project, lista para correr con **Docker + PostgreSQL**.
+Aplicación web completa en **Next.js 14 (App Router)** + **TypeScript** para la gestión integral de la academia de baile Bellydance Project. El sistema permite administrar usuarios, inscripciones, clases, horarios, asistencia, evaluaciones, coreografías, vestuarios, documentos, pagos y reportes, con soporte para **Docker + PostgreSQL**.
+
+## Objetivo del Negocio
+
+El objetivo principal del sistema es digitalizar y optimizar la gestión administrativa y académica de la academia de baile, permitiendo:
+- Centralizar la información de alumnas, profesoras y personal administrativo
+- Automatizar los procesos de inscripción y clasificación académica
+- Facilitar el seguimiento de asistencia y evaluaciones
+- Gestionar coreografías y vestuarios para presentaciones
+- Controlar documentos y pagos de manera eficiente
+- Generar reportes estadísticos para la toma de decisiones
 
 ## Descripción del Sistema
 
-El sistema de gestión de la academia de baile Bellydance Project es una aplicación web completa y profesional que permite administrar usuarios, clases, inscripciones, documentos, pagos, asistencia, evaluaciones y clasificación académica. El sistema está diseñado para trabajar con cuatro roles principales: Administrador, Directora Académica, Profesora y Alumna.
+El sistema de gestión de la academia de baile Bellydance Project es una aplicación web completa y profesional que permite administrar usuarios, clases, inscripciones, documentos, pagos, asistencia, evaluaciones, coreografías, vestuarios, horarios y clasificación académica. El sistema está diseñado para trabajar con cuatro roles principales: Administrador, Directora Académica, Profesora y Alumna.
 
 ### Características Principales
 
@@ -12,14 +22,17 @@ El sistema de gestión de la academia de baile Bellydance Project es una aplicac
 - **Sistema de Inscripciones**: Flujo completo de solicitud, revisión y aprobación de inscripciones
 - **Clasificación Académica**: Sistema automático de clasificación por edad y nivel académico
 - **Gestión de Clases**: Administración de clases, horarios y asignación de profesoras
-- **Control de Asistencia**: Registro y seguimiento de asistencia de alumnas
-- **Evaluaciones**: Sistema de evaluación del progreso de las alumnas
-- **Gestión de Coreografías**: Creación y gestión de coreografías para presentaciones
-- **Diseño de Vestuarios**: Administración de vestuarios para coreografías
+- **Gestión de Horarios**: Visualización y gestión de horarios de clases por categoría, nivel y profesora
+- **Control de Asistencia**: Registro y seguimiento de asistencia de alumnas con observaciones detalladas
+- **Evaluaciones**: Sistema de evaluación del progreso de las alumnas con notas y comentarios
+- **Gestión de Coreografías**: Creación y gestión de coreografías para presentaciones con videos y música
+- **Diseño de Vestuarios**: Administración de vestuarios para coreografías con imágenes
 - **Gestión de Documentos**: Control de documentos requeridos por las alumnas
-- **Control de Pagos**: Registro y seguimiento de pagos
-- **Reportes y Estadísticas**: Dashboard con métricas y exportación de reportes
+- **Control de Pagos**: Registro y seguimiento de pagos con generación de recibos
+- **Gestión de Eventos**: Administración de eventos académicos (presentaciones, recitales, talleres)
+- **Reportes y Estadísticas**: Dashboard con métricas y exportación de reportes CSV
 - **Recuperación de Contraseña**: Sistema seguro de recuperación de contraseña con tokens
+- **Modales de Confirmación**: Diálogos personalizados para acciones de eliminación
 
 ## Roles del Sistema
 
@@ -76,8 +89,10 @@ Las alumnas son las estudiantes que participan en las clases de la academia:
 - **Recuperación de Contraseña**: Recuperar contraseña mediante enlace enviado al email con token seguro
 - **Inscripción a Clases**: Ver clases disponibles y solicitar inscripción
 - **Mis Inscripciones**: Ver el estado de sus inscripciones (Pendiente, Aprobada, Rechazada), ver clasificación académica asignada
-- **Documentos**: Subir documentos requeridos, ver estado de documentos entregados
-- **Planilla de Inscripción**: Ver y descargar planilla de inscripción con sus datos personales en formato PDF
+- **Ver Clases**: Visualizar las clases donde tiene inscripciones aprobadas
+- **Ver Coreografías**: Ver coreografías donde participa, reproducir videos y música, descargar archivos
+- **Ver Vestuarios**: Ver vestuarios de sus coreografías, ver imágenes, descargar archivos
+- **Planilla de Inscripción**: Ver, editar y descargar planilla de.inscripción con sus datos personales en formato PDF
 
 **Datos de registro requeridos:**
 - Nombre
@@ -88,6 +103,272 @@ Las alumnas son las estudiantes que participan en las clases de la academia:
 - Edad
 - Dirección
 - Contraseña
+
+## Arquitectura de la Aplicación
+
+El sistema sigue una arquitectura monolítica moderna con separación de responsabilidades:
+
+### Arquitectura Frontend
+- **Framework**: Next.js 14 con App Router
+- **Lenguaje**: TypeScript
+- **UI Library**: Material UI (MUI) v5
+- **Estado**: React Hooks (useState, useEffect)
+- **Autenticación**: NextAuth.js v4
+- **Ruteo**: Sistema de rutas basado en archivos de Next.js App Router
+
+### Arquitectura Backend
+- **API Routes**: Next.js API Routes (Serverless Functions)
+- **ORM**: Prisma ORM
+- **Base de Datos**: PostgreSQL
+- **Autenticación**: NextAuth.js con Credentials Provider
+- **File Upload**: Sistema de carga de archivos a `public/uploads`
+
+### Patrón de Diseño UI
+- **Atomic Design**: Estructura de componentes en átomos, moléculas y organismos
+- **Componentes Reutilizables**: Sidebar, ConfirmDialog, vistas especializadas
+
+## Tecnologías Utilizadas
+
+### Frontend
+- **Next.js 14**: Framework React con App Router
+- **React 18**: Biblioteca UI
+- **TypeScript 5.5**: Tipado estático
+- **Material UI 5.14**: Biblioteca de componentes UI
+- **Emotion**: CSS-in-JS para estilos
+- **jsPDF 4.2**: Generación de PDFs
+- **jsPDF-AutoTable 5.0**: Tablas en PDFs
+
+### Backend
+- **Next.js API Routes**: Endpoints REST
+- **NextAuth 4.22**: Autenticación y gestión de sesiones
+- **Prisma 5.11**: ORM para base de datos
+- **PostgreSQL 15**: Base de datos relacional
+- **bcryptjs 2.4**: Hasheo de contraseñas
+- **formidable 3.5**: Procesamiento de formularios multipart
+
+### DevOps
+- **Docker**: Contenedorización
+- **Docker Compose**: Orquestación de servicios
+- **Node.js 20**: Runtime JavaScript
+
+## Estructura de Carpetas del Proyecto
+
+```
+bellydance-project/
+├── app/                          # Next.js App Router
+│   ├── admin/                   # Módulos de administrador
+│   │   ├── users/               # Gestión de usuarios
+│   │   ├── enrollments/         # Gestión de inscripciones
+│   │   ├── enrolled-students/   # Lista de alumnas inscritas
+│   │   ├── documents/           # Gestión de documentos
+│   │   ├── payments/            # Control de pagos
+│   │   ├── reports/             # Reportes y estadísticas
+│   │   └── schedules/           # Gestión de horarios
+│   ├── directora/               # Módulos de directora académica
+│   │   ├── events/              # Gestión de eventos
+│   │   ├── attendance/           # Control de asistencias
+│   │   ├── schedules/           # Visualización de horarios
+│   │   └── view-students/       # Lista de alumnas por categorías
+│   ├── profesora/               # Módulos de profesora
+│   │   ├── manage-classes/      # Gestión de contenido de clases
+│   │   ├── choreographies/      # Gestión de coreografías
+│   │   ├── costumes/             # Gestión de vestuarios
+│   │   ├── schedules/           # Visualización de horarios
+│   │   └── view-students/       # Lista de alumnas por categorías
+│   ├── student/                 # Módulos de alumna
+│   │   ├── enroll/              # Solicitar inscripción
+│   │   ├── enrollments/         # Mis inscripciones
+│   │   ├── registration-form/   # Planilla de inscripción
+│   │   ├── classes/             # Ver clases
+│   │   ├── choreographies/      # Ver coreografías
+│   │   └── costumes/             # Ver vestuarios
+│   ├── api/                     # API Routes
+│   │   ├── auth/                # Autenticación NextAuth
+│   │   ├── users/               # Endpoints de usuarios
+│   │   ├── enrollments/         # Endpoints de inscripciones
+│   │   ├── classes/             # Endpoints de clases
+│   │   ├── attendance/          # Endpoints de asistencia
+│   │   ├── evaluations/         # Endpoints de evaluaciones
+│   │   ├── choreographies/      # Endpoints de coreografías
+│   │   ├── costumes/             # Endpoints de vestuarios
+│   │   ├── documents/           # Endpoints de documentos
+│   │   ├── payments/            # Endpoints de pagos
+│   │   ├── events/              # Endpoints de eventos
+│   │   ├── reports/             # Endpoints de reportes
+│   │   ├── upload/              # Endpoint de carga de archivos
+│   │   └── class-schedules/     # Endpoints de horarios
+│   ├── login/                   # Página de login
+│   ├── register/                # Página de registro
+│   ├── dashboard/               # Dashboard principal
+│   └── layout.tsx               # Layout principal
+├── src/                         # Código fuente compartido
+│   ├── components/              # Componentes React
+│   │   ├── atoms/               # Componentes atómicos
+│   │   ├── molecules/           # Componentes moleculares
+│   │   ├── organisms/           # Componentes de organismos
+│   │   ├── admin/               # Componentes de admin
+│   │   ├── directora/           # Componentes de directora
+│   │   ├── student/             # Componentes de alumna
+│   │   └── instructor/          # Componentes de instructor
+│   ├── lib/                     # Utilidades y configuración
+│   ├── hooks/                   # Custom React hooks
+│   ├── types/                   # Definiciones de tipos TypeScript
+│   └── utils/                   # Funciones utilitarias
+├── prisma/                      # Prisma ORM
+│   └── schema.prisma            # Esquema de base de datos
+├── public/                      # Archivos estáticos
+│   └── uploads/                 # Archivos subidos (imágenes, videos)
+├── scripts/                     # Scripts de utilidad
+│   ├── seed-admin.js            # Script de inicialización de admin
+│   └── entrypoint.sh            # Script de entrypoint Docker
+├── docs/                        # Documentación técnica
+│   ├── domain-diagram.puml      # Diagrama de dominio PlantUML
+│   └── flujos/                  # Diagramas de flujo
+├── Dockerfile                   # Dockerfile de producción
+├── Dockerfile.dev               # Dockerfile de desarrollo
+├── docker-compose.yml           # Composición Docker
+├── next.config.js               # Configuración de Next.js
+├── package.json                 # Dependencias npm
+├── tsconfig.json                # Configuración TypeScript
+└── .env.sample                  # Plantilla de variables de entorno
+```
+
+## Requisitos Previos
+
+- **Node.js** v20 o superior
+- **Docker** y **Docker Compose** (para ejecución con contenedores)
+- **PostgreSQL** v15 (si no se usa Docker)
+- **npm**, **yarn** o **pnpm** (gestor de paquetes)
+
+## Variables de Entorno Necesarias
+
+Copiar el archivo `.env.sample` a `.env` y configurar las siguientes variables:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/student_docs
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=change_this_secret
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=adminpass
+PORT=3000
+```
+
+**Descripción de variables:**
+- `DATABASE_URL`: URL de conexión a PostgreSQL
+- `NEXTAUTH_URL`: URL base de la aplicación para NextAuth
+- `NEXTAUTH_SECRET`: Secreto para firmar tokens JWT (generar uno seguro en producción)
+- `ADMIN_EMAIL`: Email del usuario administrador
+- `ADMIN_PASSWORD`: Contraseña del usuario administrador
+- `PORT`: Puerto donde corre la aplicación (default: 3000)
+
+## Instalación y Configuración
+
+### Opción 1: Con Docker (Recomendado)
+
+1. **Clonar el repositorio:**
+```bash
+git clone <repository-url>
+cd inscripciones-bellydance-project
+```
+
+2. **Configurar variables de entorno:**
+```bash
+cp .env.sample .env
+# Editar .env con tus configuraciones
+```
+
+3. **Levantar servicios con Docker Compose:**
+```bash
+docker-compose up -d
+```
+
+4. **Inicializar base de datos:**
+```bash
+docker-compose exec web npx prisma db push
+docker-compose exec web npm run seed
+```
+
+5. **Acceder a la aplicación:**
+```
+http://localhost:3000
+```
+
+### Opción 2: Sin Docker (Desarrollo Local)
+
+1. **Clonar el repositorio:**
+```bash
+git clone <repository-url>
+cd inscripciones-bellydance-project
+```
+
+2. **Instalar dependencias:**
+```bash
+npm install
+# o
+yarn install
+```
+
+3. **Configurar PostgreSQL:**
+```bash
+# Asegúrate de tener PostgreSQL corriendo
+# Crea la base de datos:
+createdb student_docs
+```
+
+4. **Configurar variables de entorno:**
+```bash
+cp .env.sample .env
+# Editar .env con tus configuraciones de PostgreSQL
+```
+
+5. **Inicializar Prisma:**
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+6. **Seed de datos iniciales:**
+```bash
+npm run seed
+```
+
+7. **Iniciar servidor de desarrollo:**
+```bash
+npm run dev
+```
+
+8. **Acceder a la aplicación:**
+```
+http://localhost:3000
+```
+
+## Ejecución en Desarrollo
+
+```bash
+npm run dev
+```
+
+El servidor de desarrollo se iniciará en `http://localhost:3000` con hot reload activado.
+
+## Ejecución en Producción
+
+### Con Docker
+
+```bash
+docker-compose up -d
+```
+
+### Sin Docker
+
+1. **Construir la aplicación:**
+```bash
+npm run build
+```
+
+2. **Iniciar servidor de producción:**
+```bash
+npm start
+```
 
 ## Flujo General del Sistema
 
@@ -101,6 +382,155 @@ Las alumnas son las estudiantes que participan en las clases de la academia:
 8. **Gestión de Documentos**: Las alumnas suben documentos, el administrador los revisa
 9. **Control de Pagos**: El administrador gestiona los pagos de las alumnas
 10. **Reportes**: El administrador y directora académica acceden a estadísticas y reportes
+
+## API Endpoints Principales
+
+### Autenticación
+- `POST /api/auth/signin` - Inicio de sesión
+- `POST /api/auth/signout` - Cierre de sesión
+- `POST /api/forgot-password` - Solicitar recuperación de contraseña
+- `POST /api/reset-password` - Restablecer contraseña con token
+
+### Usuarios
+- `GET /api/users` - Listar todos los usuarios
+- `POST /api/users` - Crear nuevo usuario
+- `GET /api/user` - Obtener usuario actual
+
+### Inscripciones
+- `GET /api/enrollments` - Listar todas las inscripciones
+- `GET /api/enrollments/my` - Listar inscripciones del usuario actual
+- `POST /api/enrollments/submit` - Enviar solicitud de inscripción
+- `PATCH /api/enrollments/[id]` - Aprobar/rechazar inscripción
+
+### Clases
+- `GET /api/classes` - Listar todas las clases
+- `POST /api/classes` - Crear nueva clase
+- `PUT /api/classes/[id]` - Actualizar clase
+- `DELETE /api/classes/[id]` - Eliminar clase
+
+### Asistencia
+- `GET /api/attendance` - Listar registros de asistencia
+- `POST /api/attendance` - Registrar asistencia
+- `DELETE /api/attendance/[id]` - Eliminar registro de asistencia
+
+### Evaluaciones
+- `GET /api/evaluations` - Listar evaluaciones
+- `POST /api/evaluations` - Crear evaluación
+
+### Coreografías
+- `GET /api/choreographies` - Listar coreografías
+- `POST /api/choreographies` - Crear coreografía
+- `PUT /api/choreographies/[id]` - Actualizar coreografía
+- `DELETE /api/choreographies/[id]` - Eliminar coreografía
+
+### Vestuarios
+- `GET /api/costumes` - Listar vestuarios
+- `POST /api/costumes` - Crear vestuario
+- `PUT /api/costumes/[id]` - Actualizar vestuario
+- `DELETE /api/costumes/[id]` - Eliminar vestuario
+
+### Documentos
+- `GET /api/documents` - Listar documentos
+- `POST /api/documents` - Crear documento
+- `PUT /api/documents/[id]` - Actualizar documento
+
+### Pagos
+- `GET /api/payments` - Listar pagos
+- `POST /api/payments` - Registrar pago
+
+### Eventos
+- `GET /api/events` - Listar eventos
+- `POST /api/events` - Crear evento
+- `PUT /api/events/[id]` - Actualizar evento
+- `DELETE /api/events/[id]` - Eliminar evento
+
+### Horarios
+- `GET /api/class-schedules` - Listar horarios de clases
+- `POST /api/class-schedules` - Crear horario
+- `PUT /api/class-schedules/[id]` - Actualizar horario
+- `DELETE /api/class-schedules/[id]` - Eliminar horario
+
+### Reportes
+- `GET /api/reports` - Obtener estadísticas del sistema
+- `GET /api/reports/csv` - Exportar reporte en CSV
+
+### Upload de Archivos
+- `POST /api/upload` - Subir archivos (imágenes, videos, música)
+
+## Consideraciones de Seguridad
+
+### Autenticación y Autorización
+- **NextAuth.js**: Gestión segura de sesiones con tokens JWT
+- **bcryptjs**: Hasheo de contraseñas con salt rounds
+- **Role-Based Access Control (RBAC)**: Control de acceso basado en roles
+- **Session Management**: Sesiones con tiempo de expiración configurable
+
+### Validación de Datos
+- **Validación de entrada**: Validación en frontend y backend
+- **Unicidad de email y cédula**: Restricciones a nivel de base de datos
+- **Sanitización de inputs**: Prevención de inyección SQL mediante Prisma ORM
+
+### Seguridad en Archivos
+- **Validación de tipos**: Solo se permiten imágenes, videos y audio
+- **Nombres únicos**: Timestamps para prevenir colisiones de nombres
+- **Almacenamiento seguro**: Archivos en directorio `public/uploads` con configuración de Next.js
+
+### Tokens de Recuperación
+- **Tokens únicos**: Generación de tokens seguros para recuperación de contraseña
+- **Expiración**: Tokens con tiempo de expiración (1 hora por defecto)
+- **Uso único**: Tokens invalidados después de ser utilizados
+
+### HTTPS en Producción
+- **NEXTAUTH_URL**: Configuración obligatoria para HTTPS en producción
+- **NEXTAUTH_SECRET**: Secreto JWT debe ser generado aleatoriamente en producción
+
+## Problemas Conocidos
+
+1. **Gestión de Documentos**: El módulo de gestión de documentos está implementado como placeholder y requiere funcionalidad completa
+2. **Validación de Horarios**: No hay validación para evitar conflictos de horarios entre clases
+3. **Notificaciones**: No hay sistema de notificaciones para alumnas sobre cambios en inscripciones
+4. **Backup de Base de Datos**: No hay automatización de backups de la base de datos
+5. **Rate Limiting**: No hay implementación de rate limiting en API endpoints
+
+## Futuras Mejoras
+
+### Corto Plazo
+- Completar funcionalidad de gestión de documentos
+- Implementar validación de conflictos de horarios
+- Agregar sistema de notificaciones por email
+- Implementar rate limiting en API endpoints
+
+### Mediano Plazo
+- Sistema de mensajería interna entre usuarios
+- Calendario interactivo para visualización de horarios
+- Reportes personalizados con filtros avanzados
+- Sistema de notificaciones push en tiempo real
+
+### Largo Plazo
+- Aplicación móvil (React Native)
+- Integración con pasarelas de pago online
+- Sistema de videoconferencias para clases virtuales
+- Analytics avanzado con dashboards interactivos
+- Sistema de gamificación para alumnas
+
+## Documentación Técnica Adicional
+
+Para documentación técnica detallada, diagramas UML y especificaciones de casos de uso, consulte la carpeta `/docs`:
+
+- `/docs/modelo-dominio.md` - Modelo de dominio del sistema
+- `/docs/casos-de-uso.md` - Diagramas de casos de uso por rol
+- `/docs/diagrama-clases.md` - Diagrama de clases del sistema
+- `/docs/diagramas-secuencia.md` - Diagramas de secuencia de procesos clave
+- `/docs/diagramas-actividad.md` - Diagramas de actividad de procesos principales
+- `/docs/erd.md` - Diagrama Entidad-Relación de la base de datos
+
+## Soporte y Contribuciones
+
+Para reportar problemas o sugerir mejoras, por favor contacte al equipo de desarrollo o abra un issue en el repositorio del proyecto.
+
+## Licencia
+
+Este proyecto es propiedad de Bellydance Project Academy. Todos los derechos reservados.
 
 ## Vistas del Sistema
 
@@ -138,12 +568,6 @@ Esta sección describe las vistas principales de la aplicación según el rol de
   - Chips de colores para cada estado
 
 #### Vistas de Profesora
-
-- **Gestión de Clases** (`/profesora/classes`)
-  - Lista de clases asignadas a la profesora
-  - Detalles de cada clase (nombre, descripción, horario)
-  - Lista de alumnas inscritas en cada clase
-  - Información de asistencia
 
 - **Gestión de Coreografías** (`/profesora/choreographies`)
   - Lista de coreografías creadas
@@ -610,7 +1034,7 @@ graph TD
 ```mermaid
 graph TD
     Profesora[Profesora]
-    CU1[Gestionar Clases]
+    CU1[Gestionar Contenido de Clases]
     CU2[Registro de Asistencia]
     CU3[Evaluaciones]
     CU4[Gestionar Coreografías]
