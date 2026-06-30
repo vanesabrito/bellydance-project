@@ -194,7 +194,7 @@ export default function ChangePasswordPage() {
               fullWidth
               required
               disabled={loading}
-              error={confirmPassword && newPassword !== confirmPassword}
+              error={!!confirmPassword && newPassword !== confirmPassword}
               helperText={
                 confirmPassword && newPassword !== confirmPassword
                   ? "Las contraseñas no coinciden"

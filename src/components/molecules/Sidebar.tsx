@@ -137,6 +137,48 @@ export default function Sidebar() {
                 <ListItemText primary="Gestionar Planilla de Inscripción" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/classes"
+                selected={isSelected("/student/classes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Ver Clases" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/choreographies"
+                selected={isSelected("/student/choreographies")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <MusicNoteIcon />
+                </ListItemIcon>
+                <ListItemText primary="Ver Coreografías" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/costumes"
+                selected={isSelected("/student/costumes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <CheckroomIcon />
+                </ListItemIcon>
+                <ListItemText primary="Ver Vestuarios" />
+              </ListItemButton>
+            </ListItem>
           </>
         )}
 
@@ -146,15 +188,15 @@ export default function Sidebar() {
             <ListItem disablePadding>
               <ListItemButton
                 component={Link}
-                href="/profesora/classes"
-                selected={isSelected("/profesora/classes")}
+                href="/profesora/manage-classes"
+                selected={isSelected("/profesora/manage-classes")}
                 disableRipple
                 sx={itemSx}
               >
                 <ListItemIcon>
                   <SchoolIcon />
                 </ListItemIcon>
-                <ListItemText primary="Gestionar Clases" />
+                <ListItemText primary="Gestionar Contenido de Clases" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -197,6 +239,20 @@ export default function Sidebar() {
                   <ScheduleIcon />
                 </ListItemIcon>
                 <ListItemText primary="Visualizar Horarios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/view-students"
+                selected={isSelected("/profesora/view-students")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Buscar Lista de Alumnas por Categorías" />
               </ListItemButton>
             </ListItem>
           </>
@@ -245,6 +301,20 @@ export default function Sidebar() {
                   <ScheduleIcon />
                 </ListItemIcon>
                 <ListItemText primary="Visualizar Horarios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/view-students"
+                selected={isSelected("/directora/view-students")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Buscar Lista de Alumnas por Categorías" />
               </ListItemButton>
             </ListItem>
           </>

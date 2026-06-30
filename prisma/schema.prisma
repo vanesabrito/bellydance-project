@@ -45,6 +45,12 @@ model Class {
   instructor  User       @relation("TaughtBy", fields: [instructorId], references: [id])
   instructorId String
   supportMaterial String? // JSON string with URLs for videos, music, documents
+  warmupExercises String? // Ejercicios de precalentamiento
+  danceRoutineDescription String? // Descripción de la rutina de baile
+  danceTechniqueDescription String? // Descripción de la técnica de baile
+  technique   String?    // Técnica del movimiento trabajado en la clase (legacy)
+  topic       String?    // Tema desarrollado en la clase (legacy)
+  observations String?  // Observaciones de la clase (legacy)
   schedules   Schedule[]
   enrollments Enrollment[]
   attendances Attendance[]

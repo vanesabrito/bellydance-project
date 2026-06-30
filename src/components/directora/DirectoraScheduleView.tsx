@@ -14,6 +14,9 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import SearchIcon from "@mui/icons-material/Search";
 
 interface ClassSchedule {
   id: string;
@@ -87,6 +90,7 @@ export default function DirectoraScheduleView() {
   const [filterDay, setFilterDay] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
   const [filterAcademicLevel, setFilterAcademicLevel] = useState("");
+  const [filteredSchedules, setFilteredSchedules] = useState<ClassSchedule[]>([]);
 
   useEffect(() => {
     loadSchedules();
@@ -100,6 +104,7 @@ export default function DirectoraScheduleView() {
       if (response.ok) {
         const data = await response.json();
         setSchedules(data.schedules || []);
+        setFilteredSchedules(data.schedules || []);
       } else {
         const error = await response.json();
         setError(error.error || "Error al cargar horarios");
@@ -132,13 +137,16 @@ export default function DirectoraScheduleView() {
     if (name === "academicLevel") setFilterAcademicLevel(value);
   };
 
-  const filteredSchedules = schedules.filter((schedule) => {
-    if (filterInstructor && schedule.instructor.id !== filterInstructor) return false;
-    if (filterDay && schedule.day !== filterDay) return false;
-    if (filterMonth && schedule.month !== filterMonth) return false;
-    if (filterAcademicLevel && schedule.academicLevel !== filterAcademicLevel) return false;
-    return true;
-  });
+  const applyFilters = () => {
+    const filtered = schedules.filter((schedule) => {
+      if (filterInstructor && schedule.instructor.id !== filterInstructor) return false;
+      if (filterDay && schedule.day !== filterDay) return false;
+      if (filterMonth && schedule.month !== filterMonth) return false;
+      if (filterAcademicLevel && schedule.academicLevel !== filterAcademicLevel) return false;
+      return true;
+    });
+    setFilteredSchedules(filtered);
+  };
 
   return (
     <Box>
@@ -152,82 +160,102 @@ export default function DirectoraScheduleView() {
         </Alert>
       )}
 
-      <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Filtrar por Profesora</InputLabel>
-          <Select
-            name="instructor"
-            value={filterInstructor}
-            onChange={handleFilterChange}
-            label="Filtrar por Profesora"
-          >
-            <MenuItem value="">Todas las profesoras</MenuItem>
-            {instructors.map((instructor) => (
-              <MenuItem key={instructor.id} value={instructor.id}>
-                {instructor.nombre} {instructor.apellido}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      <Grid container spacing={2} alignItems="center" sx={{ mb: 4 }}>
+        <Grid item xs={12} md={2.4}>
+          <FormControl fullWidth>
+            <InputLabel>Filtrar por Profesora</InputLabel>
+            <Select
+              name="instructor"
+              value={filterInstructor}
+              onChange={handleFilterChange}
+              label="Filtrar por Profesora"
+            >
+              <MenuItem value="">Todas las profesoras</MenuItem>
+              {instructors.map((instructor) => (
+                <MenuItem key={instructor.id} value={instructor.id}>
+                  {instructor.nombre} {instructor.apellido}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
 
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Filtrar por Nivel Académico</InputLabel>
-          <Select
-            name="academicLevel"
-            value={filterAcademicLevel}
-            onChange={handleFilterChange}
-            label="Filtrar por Nivel Académico"
-          >
-            <MenuItem value="">Todos los niveles</MenuItem>
-            <MenuItem value="BASICO">Básico</MenuItem>
-            <MenuItem value="INTERMEDIO">Intermedio</MenuItem>
-            <MenuItem value="AVANZADO">Avanzado</MenuItem>
-          </Select>
-        </FormControl>
+        <Grid item xs={12} md={2.4}>
+          <FormControl fullWidth>
+            <InputLabel>Filtrar por Nivel Académico</InputLabel>
+            <Select
+              name="academicLevel"
+              value={filterAcademicLevel}
+              onChange={handleFilterChange}
+              label="Filtrar por Nivel Académico"
+            >
+              <MenuItem value="">Todos los niveles</MenuItem>
+              <MenuItem value="BASICO">Básico</MenuItem>
+              <MenuItem value="INTERMEDIO">Intermedio</MenuItem>
+              <MenuItem value="AVANZADO">Avanzado</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
 
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Filtrar por Día</InputLabel>
-          <Select
-            name="day"
-            value={filterDay}
-            onChange={handleFilterChange}
-            label="Filtrar por Día"
-          >
-            <MenuItem value="">Todos los días</MenuItem>
-            <MenuItem value="MONDAY">Lunes</MenuItem>
-            <MenuItem value="TUESDAY">Martes</MenuItem>
-            <MenuItem value="WEDNESDAY">Miércoles</MenuItem>
-            <MenuItem value="THURSDAY">Jueves</MenuItem>
-            <MenuItem value="FRIDAY">Viernes</MenuItem>
-            <MenuItem value="SATURDAY">Sábado</MenuItem>
-            <MenuItem value="SUNDAY">Domingo</MenuItem>
-          </Select>
-        </FormControl>
+        <Grid item xs={12} md={2.4}>
+          <FormControl fullWidth>
+            <InputLabel>Filtrar por Día</InputLabel>
+            <Select
+              name="day"
+              value={filterDay}
+              onChange={handleFilterChange}
+              label="Filtrar por Día"
+            >
+              <MenuItem value="">Todos los días</MenuItem>
+              <MenuItem value="MONDAY">Lunes</MenuItem>
+              <MenuItem value="TUESDAY">Martes</MenuItem>
+              <MenuItem value="WEDNESDAY">Miércoles</MenuItem>
+              <MenuItem value="THURSDAY">Jueves</MenuItem>
+              <MenuItem value="FRIDAY">Viernes</MenuItem>
+              <MenuItem value="SATURDAY">Sábado</MenuItem>
+              <MenuItem value="SUNDAY">Domingo</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
 
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Filtrar por Mes</InputLabel>
-          <Select
-            name="month"
-            value={filterMonth}
-            onChange={handleFilterChange}
-            label="Filtrar por Mes"
+        <Grid item xs={12} md={2.4}>
+          <FormControl fullWidth>
+            <InputLabel>Filtrar por Mes</InputLabel>
+            <Select
+              name="month"
+              value={filterMonth}
+              onChange={handleFilterChange}
+              label="Filtrar por Mes"
+            >
+              <MenuItem value="">Todos los meses</MenuItem>
+              <MenuItem value="ENERO">Enero</MenuItem>
+              <MenuItem value="FEBRERO">Febrero</MenuItem>
+              <MenuItem value="MARZO">Marzo</MenuItem>
+              <MenuItem value="ABRIL">Abril</MenuItem>
+              <MenuItem value="MAYO">Mayo</MenuItem>
+              <MenuItem value="JUNIO">Junio</MenuItem>
+              <MenuItem value="JULIO">Julio</MenuItem>
+              <MenuItem value="AGOSTO">Agosto</MenuItem>
+              <MenuItem value="SEPTIEMBRE">Septiembre</MenuItem>
+              <MenuItem value="OCTUBRE">Octubre</MenuItem>
+              <MenuItem value="NOVIEMBRE">Noviembre</MenuItem>
+              <MenuItem value="DICIEMBRE">Diciembre</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} md={2.4}>
+          <Button
+            variant="contained"
+            startIcon={<SearchIcon />}
+            onClick={applyFilters}
+            fullWidth
+            sx={{ backgroundColor: "#ec407a", "&:hover": { backgroundColor: "#d81b60" } }}
           >
-            <MenuItem value="">Todos los meses</MenuItem>
-            <MenuItem value="ENERO">Enero</MenuItem>
-            <MenuItem value="FEBRERO">Febrero</MenuItem>
-            <MenuItem value="MARZO">Marzo</MenuItem>
-            <MenuItem value="ABRIL">Abril</MenuItem>
-            <MenuItem value="MAYO">Mayo</MenuItem>
-            <MenuItem value="JUNIO">Junio</MenuItem>
-            <MenuItem value="JULIO">Julio</MenuItem>
-            <MenuItem value="AGOSTO">Agosto</MenuItem>
-            <MenuItem value="SEPTIEMBRE">Septiembre</MenuItem>
-            <MenuItem value="OCTUBRE">Octubre</MenuItem>
-            <MenuItem value="NOVIEMBRE">Noviembre</MenuItem>
-            <MenuItem value="DICIEMBRE">Diciembre</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+            Buscar
+          </Button>
+        </Grid>
+      </Grid>
 
       {loading ? (
         <Typography>Cargando horarios...</Typography>
