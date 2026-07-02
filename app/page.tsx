@@ -109,7 +109,7 @@ export default function Home() {
                   },
                 }}
               >
-                Registrar estudiante
+                Registrar Alumna
               </Button>
               <Button
                 variant="contained"

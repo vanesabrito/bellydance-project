@@ -50,13 +50,9 @@ export async function GET(req: Request) {
       };
     }
 
-    if (ageCategory) {
-      where.ageCategory = ageCategory;
-    }
-
-    if (academicLevel) {
-      where.academicLevel = academicLevel;
-    }
+    // NOTA: No filtramos por ageCategory ni academicLevel en el where clause
+    // porque estos campos pueden ser null en la base de datos y se calculan dinámicamente.
+    // El filtrado se hará después de obtener los datos y calcular los valores.
 
     const enrollments = await prisma.enrollment.findMany({
       where,
@@ -117,18 +113,43 @@ export async function GET(req: Request) {
       }
     });
 
+    // Apply filters for ageCategory and academicLevel after grouping
+    if (ageCategory || academicLevel) {
+      Object.keys(groupedStudents).forEach((category) => {
+        if (ageCategory && category !== ageCategory) {
+          // Clear entire category if it doesn't match
+          (groupedStudents as any)[category] = {
+            BASICO: [],
+            INTERMEDIO: [],
+            AVANZADO: [],
+          };
+        } else {
+          Object.keys((groupedStudents as any)[category]).forEach((level) => {
+            if (academicLevel && level !== academicLevel) {
+              (groupedStudents as any)[category][level] = [];
+            }
+          });
+        }
+      });
+    }
+
+    // Recalculate counts after filtering
+    const filteredEnrollments = Object.values(groupedStudents).flatMap((category: any) =>
+      Object.values(category).flat()
+    );
+
     // Calculate counts
     const counts = {
-      total: enrollments.length,
+      total: filteredEnrollments.length,
       byCategory: {
-        MINI_BELLYDANCE: enrollments.filter((e: any) => e.ageCategory === "MINI_BELLYDANCE").length,
-        BELLYDANCE_ADOLESCENTES: enrollments.filter((e: any) => e.ageCategory === "BELLYDANCE_ADOLESCENTES").length,
-        BELLYDANCE_ADULTAS: enrollments.filter((e: any) => e.ageCategory === "BELLYDANCE_ADULTAS").length,
+        MINI_BELLYDANCE: filteredEnrollments.filter((e: any) => e.ageCategory === "MINI_BELLYDANCE").length,
+        BELLYDANCE_ADOLESCENTES: filteredEnrollments.filter((e: any) => e.ageCategory === "BELLYDANCE_ADOLESCENTES").length,
+        BELLYDANCE_ADULTAS: filteredEnrollments.filter((e: any) => e.ageCategory === "BELLYDANCE_ADULTAS").length,
       },
       byLevel: {
-        BASICO: enrollments.filter((e: any) => e.academicLevel === "BASICO").length,
-        INTERMEDIO: enrollments.filter((e: any) => e.academicLevel === "INTERMEDIO").length,
-        AVANZADO: enrollments.filter((e: any) => e.academicLevel === "AVANZADO").length,
+        BASICO: filteredEnrollments.filter((e: any) => e.academicLevel === "BASICO").length,
+        INTERMEDIO: filteredEnrollments.filter((e: any) => e.academicLevel === "INTERMEDIO").length,
+        AVANZADO: filteredEnrollments.filter((e: any) => e.academicLevel === "AVANZADO").length,
       },
       byGroup: {
         MINI_BELLYDANCE_BASICO: groupedStudents.MINI_BELLYDANCE.BASICO.length,

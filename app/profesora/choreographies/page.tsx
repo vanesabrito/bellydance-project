@@ -26,6 +26,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { useSession } from "next-auth/react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import ConfirmDialog from "@/components/molecules/ConfirmDialog";
 
 interface Choreography {
   id: string;
@@ -50,6 +51,7 @@ interface Student {
   id: string;
   nombre: string | null;
   apellido: string | null;
+  email: string | null;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -67,6 +69,8 @@ export default function ProfesoraChoreographiesPage() {
   const [uploadingMusic, setUploadingMusic] = useState(false);
   const [open, setOpen] = useState(false);
   const [editingChoreography, setEditingChoreography] = useState<Choreography | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -185,10 +189,15 @@ export default function ProfesoraChoreographiesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar esta coreografía?")) return;
+    setItemToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
 
     try {
-      const res = await fetch(`/api/choreographies/${id}`, {
+      const res = await fetch(`/api/choreographies/${itemToDelete}`, {
         method: "DELETE",
       });
       const json = await res.json();
@@ -197,6 +206,9 @@ export default function ProfesoraChoreographiesPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -256,7 +268,7 @@ export default function ProfesoraChoreographiesPage() {
     }
   };
 
-  if (!session || session.user?.role !== "PROFESORA") {
+  if (!session || (session as any)?.user?.role !== "PROFESORA") {
     return null;
   }
 
@@ -486,10 +498,14 @@ export default function ProfesoraChoreographiesPage() {
                 value={formData.participantIds}
                 label="Alumnas Participantes"
                 onChange={(e) => setFormData({ ...formData, participantIds: e.target.value as string[] })}
+                renderValue={(selected) => {
+                  const selectedStudents = students.filter((s) => selected.includes(s.id));
+                  return selectedStudents.map((s) => `${s.nombre || ""} ${s.apellido || ""}`.trim() || s.email || "Sin nombre").join(", ");
+                }}
               >
                 {students.map((student) => (
                   <MenuItem key={student.id} value={student.id}>
-                    {student.nombre} {student.apellido}
+                    {`${student.nombre || ""} ${student.apellido || ""}`.trim() || student.email || "Sin nombre"}
                   </MenuItem>
                 ))}
               </Select>
@@ -503,6 +519,19 @@ export default function ProfesoraChoreographiesPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Confirmar eliminación"
+        message="¿Está seguro de que desea eliminar esta coreografía?"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setItemToDelete(null);
+        }}
+      />
     </Container>
   );
 }

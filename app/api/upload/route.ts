@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +20,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "No se proporcionó ningún archivo" }, { status: 400 });
     }
 
+    console.log("File received:", file.name, file.type, file.size);
+
     // Validar que sea una imagen, video o audio
     const validTypes = [
       "image/",
@@ -37,22 +39,40 @@ export async function POST(req: Request) {
     const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const fileName = `${timestamp}_${originalName}`;
     
+    console.log("Generated filename:", fileName);
+    
     // Convertir el archivo a buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Guardar el archivo en el directorio uploads
-    const uploadDir = path.join(process.cwd(), "uploads");
+    console.log("File buffer size:", buffer.length);
+
+    // Crear directorio public/uploads si no existe
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    console.log("Upload directory:", uploadDir);
+
+    try {
+      await mkdir(uploadDir, { recursive: true });
+      console.log("Directory created or already exists");
+    } catch (mkdirError: any) {
+      console.error("Error creating directory:", mkdirError);
+      return NextResponse.json({ ok: false, error: "Error al crear directorio de uploads: " + mkdirError.message }, { status: 500 });
+    }
+
     const filePath = path.join(uploadDir, fileName);
+    console.log("File path:", filePath);
     
     await writeFile(filePath, buffer);
+    console.log("File saved successfully");
 
     // Retornar la URL del archivo
     const fileUrl = `/uploads/${fileName}`;
+    console.log("File URL:", fileUrl);
 
     return NextResponse.json({ ok: true, fileUrl });
   } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ ok: false, error: "Error del servidor" }, { status: 500 });
+    console.error("Upload error:", err);
+    console.error("Error stack:", err.stack);
+    return NextResponse.json({ ok: false, error: "Error del servidor: " + (err?.message || "Error desconocido") }, { status: 500 });
   }
 }

@@ -14,8 +14,11 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const roleFilter = searchParams.get("role");
   
-  // Si se filtra por rol ALUMNA, permitir acceso a DIRECTORA_ACADEMICA
+  // Si se filtra por rol ALUMNA, permitir acceso a DIRECTORA_ACADEMICA y PROFESORA
   if (roleFilter === "ALUMNA") {
+    if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA" && session.user?.role !== "PROFESORA")
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  } else if (roleFilter === "PROFESORA") {
     if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   } else {

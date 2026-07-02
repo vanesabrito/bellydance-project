@@ -26,6 +26,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import { useSession } from "next-auth/react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import ConfirmDialog from "@/components/molecules/ConfirmDialog";
 
 interface Costume {
   id: string;
@@ -61,6 +62,8 @@ export default function ProfesoraCostumesPage() {
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
   const [editingCostume, setEditingCostume] = useState<Costume | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -180,10 +183,15 @@ export default function ProfesoraCostumesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este vestuario?")) return;
+    setItemToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
 
     try {
-      const res = await fetch(`/api/costumes/${id}`, {
+      const res = await fetch(`/api/costumes/${itemToDelete}`, {
         method: "DELETE",
       });
       const json = await res.json();
@@ -192,6 +200,9 @@ export default function ProfesoraCostumesPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -223,7 +234,7 @@ export default function ProfesoraCostumesPage() {
     }
   };
 
-  if (!session || session.user?.role !== "PROFESORA") {
+  if (!session || (session as any)?.user?.role !== "PROFESORA") {
     return null;
   }
 
@@ -466,6 +477,19 @@ export default function ProfesoraCostumesPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Confirmar eliminación"
+        message="¿Está seguro de que desea eliminar este vestuario?"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setItemToDelete(null);
+        }}
+      />
     </Container>
   );
 }

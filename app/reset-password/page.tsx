@@ -147,7 +147,7 @@ export default function ResetPasswordPage() {
                     onClick={() => setShowPassword((s) => !s)}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -183,7 +183,7 @@ export default function ResetPasswordPage() {
                     onClick={() => setShowConfirmPassword((s) => !s)}
                     edge="end"
                   >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),

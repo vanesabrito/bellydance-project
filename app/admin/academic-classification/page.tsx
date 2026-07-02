@@ -187,7 +187,7 @@ export default function AcademicClassificationPage() {
     );
   }) || [];
 
-  if (!session || (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")) {
+  if (!session || ((session as any)?.user?.role !== "ADMIN" && (session as any)?.user?.role !== "DIRECTORA_ACADEMICA")) {
     return null;
   }
 

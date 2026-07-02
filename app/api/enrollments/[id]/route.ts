@@ -51,7 +51,7 @@ export async function PATCH(
     // Calculate age category automatically when approving
     let ageCategory = enrollment.ageCategory;
     if (status === "APPROVED" && !ageCategory) {
-      ageCategory = calculateAgeCategory(enrollment.student.edad);
+      ageCategory = calculateAgeCategory(enrollment.student.edad) as any;
     }
 
     const updated = await prisma.enrollment.update({

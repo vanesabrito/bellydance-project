@@ -19,6 +19,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const body = await req.json();
     const { name, description, level, music, videoUrl, duration, status, participantIds } = body;
 
+    console.log("PUT Choreography - videoUrl:", videoUrl);
+    console.log("PUT Choreography - participantIds:", participantIds);
+
     const choreography = await prisma.choreography.findUnique({
       where: { id: params.id },
     });
@@ -35,6 +38,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     await prisma.choreographyParticipant.deleteMany({
       where: { choreographyId: params.id },
     });
+
+    console.log("Deleted existing participants");
 
     // Actualizar coreografía y crear nuevos participantes
     const updatedChoreography = await prisma.choreography.update({
@@ -69,6 +74,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         },
       },
     });
+
+    console.log("Choreography updated with participants:", updatedChoreography.participants);
 
     return NextResponse.json({ ok: true, choreography: updatedChoreography });
   } catch (err: any) {

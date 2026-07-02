@@ -217,7 +217,7 @@ export default function RegisterPage() {
                     onClick={() => setShowPassword((s) => !s)}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -244,7 +244,7 @@ export default function RegisterPage() {
                     onClick={() => setShowConfirm((s) => !s)}
                     edge="end"
                   >
-                    {showConfirm ? <VisibilityOff /> : <Visibility />}
+                    {showConfirm ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),

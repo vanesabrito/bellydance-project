@@ -140,7 +140,7 @@ export default function ChangePasswordPage() {
                     onClick={() => setShowOldPassword((s) => !s)}
                     edge="end"
                   >
-                    {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                    {showOldPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -163,7 +163,7 @@ export default function ChangePasswordPage() {
                     onClick={() => setShowNewPassword((s) => !s)}
                     edge="end"
                   >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    {showNewPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -186,7 +186,7 @@ export default function ChangePasswordPage() {
                     onClick={() => setShowConfirmPassword((s) => !s)}
                     edge="end"
                   >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),

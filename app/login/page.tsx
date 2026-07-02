@@ -115,7 +115,7 @@ export default function LoginPage() {
                     onClick={() => setShowPassword((s) => !s)}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),

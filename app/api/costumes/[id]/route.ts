@@ -19,6 +19,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const body = await req.json();
     const { name, description, color, imageUrl, accessories, estimatedCost, choreographyId, status } = body;
 
+    console.log("PUT Costume - imageUrl:", imageUrl);
+
     const costume = await prisma.costume.findUnique({
       where: { id: params.id },
     });
@@ -44,6 +46,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         status,
       },
     });
+
+    console.log("Costume updated with imageUrl:", updatedCostume.imageUrl);
 
     return NextResponse.json({ ok: true, costume: updatedCostume });
   } catch (err: any) {

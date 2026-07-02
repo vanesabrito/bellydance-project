@@ -20,6 +20,10 @@ import TableRow from "@mui/material/TableRow";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ConfirmDialog from "@/components/molecules/ConfirmDialog";
 
 interface Attendance {
   id: string;
@@ -36,6 +40,7 @@ interface Attendance {
   date: string;
   present: boolean;
   note?: string | null;
+  observations?: string | null;
   createdAt: string;
 }
 
@@ -57,16 +62,20 @@ export default function DirectoraAttendancePage() {
   const [classes, setClasses] = useState<DanceClass[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingAttendance, setEditingAttendance] = useState<Attendance | null>(null);
   const [formData, setFormData] = useState({
     studentId: "",
     classId: "",
     date: new Date().toISOString().split('T')[0],
     present: true,
     note: "",
+    observations: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadAttendances();
@@ -113,25 +122,30 @@ export default function DirectoraAttendancePage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/attendance", {
-        method: "POST",
+      const isEditing = !!editingAttendance;
+      const url = isEditing ? `/api/attendance/${editingAttendance.id}` : "/api/attendance";
+      const method = isEditing ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const json = await res.json();
       if (json.ok) {
-        setSuccess("Asistencia registrada correctamente");
+        setSuccess(isEditing ? "Asistencia actualizada correctamente" : "Asistencia registrada correctamente");
         setOpen(false);
+        setEditingAttendance(null);
         setFormData({
           studentId: "",
           classId: "",
           date: new Date().toISOString().split('T')[0],
           present: true,
           note: "",
+          observations: "",
         });
         loadAttendances();
       } else {
-        setError(json.error || "No se pudo registrar la asistencia");
+        setError(json.error || "No se pudo guardar la asistencia");
       }
     } catch (err: any) {
       setError(err?.message || "Error de red");
@@ -139,6 +153,56 @@ export default function DirectoraAttendancePage() {
       setLoading(false);
     }
   }
+
+  async function handleDelete(id: string) {
+    setItemToDelete(id);
+    setDeleteDialogOpen(true);
+  }
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      const res = await fetch(`/api/attendance/${itemToDelete}`, { method: "DELETE" });
+      if (res.ok) {
+        setSuccess("Asistencia eliminada correctamente");
+        loadAttendances();
+      } else {
+        setError("No se pudo eliminar la asistencia");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Error de red");
+    } finally {
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
+  }
+
+  const handleEdit = (attendance: Attendance) => {
+    setEditingAttendance(attendance);
+    setFormData({
+      studentId: attendance.student.id,
+      classId: attendance.class.id,
+      date: attendance.date.split('T')[0],
+      present: attendance.present,
+      note: attendance.note || "",
+      observations: attendance.observations || "",
+    });
+    setOpen(true);
+  };
+
+  const handleOpenDialog = () => {
+    setEditingAttendance(null);
+    setFormData({
+      studentId: "",
+      classId: "",
+      date: new Date().toISOString().split('T')[0],
+      present: true,
+      note: "",
+      observations: "",
+    });
+    setOpen(true);
+  };
 
   if (!session) return <p>Debes iniciar sesión.</p>;
 
@@ -149,7 +213,7 @@ export default function DirectoraAttendancePage() {
           <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
             Control de Asistencias
           </Typography>
-          <Button variant="contained" onClick={() => setOpen(true)}>
+          <Button variant="contained" onClick={handleOpenDialog}>
             Registrar Asistencia
           </Button>
         </Box>
@@ -162,6 +226,7 @@ export default function DirectoraAttendancePage() {
               <TableCell>Fecha</TableCell>
               <TableCell>Estado</TableCell>
               <TableCell>Nota</TableCell>
+              <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -182,18 +247,26 @@ export default function DirectoraAttendancePage() {
                   />
                 </TableCell>
                 <TableCell>{attendance.note || "—"}</TableCell>
+                <TableCell>
+                  <IconButton onClick={() => handleEdit(attendance)} color="primary" title="Editar">
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={() => handleDelete(attendance.id)} color="error" title="Eliminar">
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             {attendances.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5}>No hay registros de asistencia aún.</TableCell>
+                <TableCell colSpan={6}>No hay registros de asistencia aún.</TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
 
         <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Registrar Asistencia</DialogTitle>
+          <DialogTitle>{editingAttendance ? "Editar Asistencia" : "Registrar Asistencia"}</DialogTitle>
           <DialogContent>
             <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2, mt: 2 }}>
               <TextField
@@ -251,12 +324,20 @@ export default function DirectoraAttendancePage() {
                 multiline
                 rows={2}
               />
+              <TextField
+                label="Observaciones (opcional)"
+                value={formData.observations}
+                onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                fullWidth
+                multiline
+                rows={2}
+              />
             </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
             <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-              {loading ? "Registrando..." : "Registrar"}
+              {loading ? (editingAttendance ? "Actualizando..." : "Registrando...") : (editingAttendance ? "Actualizar" : "Registrar")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -272,6 +353,19 @@ export default function DirectoraAttendancePage() {
             {success}
           </Alert>
         </Snackbar>
+
+        <ConfirmDialog
+          open={deleteDialogOpen}
+          title="Confirmar eliminación"
+          message="¿Está seguro de que desea eliminar esta asistencia?"
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          onConfirm={confirmDelete}
+          onCancel={() => {
+            setDeleteDialogOpen(false);
+            setItemToDelete(null);
+          }}
+        />
       </Paper>
     </Container>
   );
