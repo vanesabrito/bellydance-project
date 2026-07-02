@@ -12,6 +12,7 @@ import Image from "next/image";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import BackButton from "@/components/atoms/BackButton";
+import Link from "next/link";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
@@ -114,7 +115,7 @@ export default function LoginPage() {
                     onClick={() => setShowPassword((s) => !s)}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -136,8 +137,13 @@ export default function LoginPage() {
               },
             }}
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? "Ingresando..." : "Ingresar"}
           </Button>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
+            <Link href="/recover-password" style={{ textDecoration: "none", color: "#1976d2", textAlign: "center" }}>
+              ¿Olvidaste tu Contraseña?
+            </Link>
+          </Box>
         </Box>
       </Paper>
 

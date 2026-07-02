@@ -22,7 +22,17 @@ export const authOptions: any = {
         if (!user) return null;
         const valid = await bcrypt.compare(credentials.password, user.password);
         if (!valid) return null;
-        return { id: user.id, email: user.email, role: user.role };
+        return { 
+          id: user.id, 
+          email: user.email, 
+          role: user.role,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          cedula: user.cedula,
+          fechaNacimiento: user.fechaNacimiento,
+          edad: user.edad,
+          direccion: user.direccion
+        };
       },
     }),
   ],
@@ -34,6 +44,12 @@ export const authOptions: any = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.nombre = user.nombre;
+        token.apellido = user.apellido;
+        token.cedula = user.cedula;
+        token.fechaNacimiento = user.fechaNacimiento;
+        token.edad = user.edad;
+        token.direccion = user.direccion;
       }
       return token;
     },
@@ -41,6 +57,12 @@ export const authOptions: any = {
       if (token) {
         session.user.role = token.role;
         session.user.id = token.id;
+        session.user.nombre = token.nombre;
+        session.user.apellido = token.apellido;
+        session.user.cedula = token.cedula;
+        session.user.fechaNacimiento = token.fechaNacimiento;
+        session.user.edad = token.edad;
+        session.user.direccion = token.direccion;
       }
       return session;
     },

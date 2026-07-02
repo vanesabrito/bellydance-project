@@ -18,7 +18,13 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 export default function RegisterPage() {
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [cedula, setCedula] = useState("");
   const [email, setEmail] = useState("");
+  const [fechaNacimiento, setFechaNacimiento] = useState("");
+  const [edad, setEdad] = useState("");
+  const [direccion, setDireccion] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +44,10 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // basic client-side validation
+    if (!nombre || !apellido || !cedula || !fechaNacimiento || !edad || !direccion) {
+      setError("Todos los campos son obligatorios");
+      return;
+    }
     if (passwordTooShort) {
       setError("La contraseña debe tener al menos 8 caracteres");
       return;
@@ -52,12 +62,21 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ 
+          nombre, 
+          apellido, 
+          cedula, 
+          email, 
+          fechaNacimiento, 
+          edad: parseInt(edad), 
+          direccion,
+          password 
+        }),
       });
       const json = await res.json();
       if (json.ok) {
         setSuccess(
-          "Registrado correctamente. Redirigiendo a iniciar sesión..."
+          "Registrada correctamente. Redirigiendo a iniciar sesión..."
         );
         setTimeout(() => router.push("/login"), 1200);
       } else {
@@ -65,7 +84,7 @@ export default function RegisterPage() {
           // Prefer status code when available
           switch (res.status) {
             case 409:
-              return "El email ya está registrado";
+              return "El email o cédula ya está registrado";
             case 400:
               return "Faltan campos obligatorios";
             case 500:
@@ -75,7 +94,7 @@ export default function RegisterPage() {
               if (typeof json.error === "string") {
                 const e = json.error.toLowerCase();
                 if (e.includes("already in use"))
-                  return "El email ya está registrado";
+                  return "El email o cédula ya está registrado";
                 if (e.includes("missing")) return "Faltan campos obligatorios";
               }
               return "No se pudo completar el registro";
@@ -100,13 +119,40 @@ export default function RegisterPage() {
           gutterBottom
           sx={{ textAlign: "left", fontWeight: 700 }}
         >
-          Registrar estudiante
+          Registrar alumna
         </Typography>
         <Box
           component="form"
           onSubmit={handleSubmit}
           sx={{ mt: 2, display: "grid", gap: 2 }}
         >
+          <TextField
+            label="Nombre"
+            value={nombre}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNombre(e.target.value)
+            }
+            fullWidth
+            required
+          />
+          <TextField
+            label="Apellido"
+            value={apellido}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setApellido(e.target.value)
+            }
+            fullWidth
+            required
+          />
+          <TextField
+            label="Número de Cédula"
+            value={cedula}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setCedula(e.target.value)
+            }
+            fullWidth
+            required
+          />
           <TextField
             label="Email"
             type="email"
@@ -116,6 +162,39 @@ export default function RegisterPage() {
             }
             fullWidth
             required
+          />
+          <TextField
+            label="Fecha de Nacimiento"
+            type="date"
+            value={fechaNacimiento}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFechaNacimiento(e.target.value)
+            }
+            fullWidth
+            required
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="Edad"
+            type="number"
+            value={edad}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setEdad(e.target.value)
+            }
+            fullWidth
+            required
+            inputProps={{ min: 1, max: 100 }}
+          />
+          <TextField
+            label="Dirección"
+            value={direccion}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setDireccion(e.target.value)
+            }
+            fullWidth
+            required
+            multiline
+            rows={2}
           />
           <TextField
             label="Contraseña"
@@ -138,7 +217,7 @@ export default function RegisterPage() {
                     onClick={() => setShowPassword((s) => !s)}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -165,7 +244,7 @@ export default function RegisterPage() {
                     onClick={() => setShowConfirm((s) => !s)}
                     edge="end"
                   >
-                    {showConfirm ? <VisibilityOff /> : <Visibility />}
+                    {showConfirm ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),

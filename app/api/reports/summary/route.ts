@@ -3,17 +3,19 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!["ADMIN", "COORDINATOR"].includes(session.user?.role))
+  if (session.user?.role !== "ADMIN")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const [
     totalUsers,
     totalAdmins,
-    totalStudents,
+    totalAlumnas,
     totalEnrollments,
     pending,
     approved,
@@ -21,7 +23,7 @@ export async function GET() {
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { role: "ADMIN" } }),
-    prisma.user.count({ where: { role: "STUDENT" } }),
+    prisma.user.count({ where: { role: "ALUMNA" } }),
     prisma.enrollment.count(),
     prisma.enrollment.count({ where: { status: "PENDING" } }),
     prisma.enrollment.count({ where: { status: "APPROVED" } }),
@@ -49,7 +51,7 @@ export async function GET() {
     stats: {
       totalUsers,
       totalAdmins,
-      totalStudents,
+      totalAlumnas,
       totalEnrollments,
       pending,
       approved,

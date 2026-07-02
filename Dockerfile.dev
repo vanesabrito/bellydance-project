@@ -1,0 +1,19 @@
+FROM node:20-bullseye-slim
+
+WORKDIR /usr/src/app
+
+# Install deps
+COPY package.json yarn.lock* ./
+COPY prisma ./prisma
+RUN apt-get update \
+    && apt-get install -y python3 make g++ libc6-dev libssl-dev ca-certificates postgresql-client --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+RUN yarn install --frozen-lockfile || yarn install
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy source (will be mounted as volume in docker-compose for hot reload)
+COPY . ./
+
+EXPOSE 3000

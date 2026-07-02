@@ -17,37 +17,74 @@ async function run() {
     if (!existingAdmin) {
       const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
       await prisma.user.create({
-        data: { email: ADMIN_EMAIL, password: hash, role: "ADMIN" },
+        data: { 
+          email: ADMIN_EMAIL, 
+          password: hash, 
+          role: "ADMIN",
+          nombre: "Administrador",
+          apellido: "Sistema",
+          cedula: "00000000",
+          fechaNacimiento: new Date("1990-01-01"),
+          edad: 34
+        },
       });
       console.log(`Created admin user: ${ADMIN_EMAIL}`);
     } else {
       console.log("Admin already exists:", ADMIN_EMAIL);
     }
 
-    // Crear coordinador
-    const coordEmail = "coordinator@bellydance.com";
-    const existingCoord = await prisma.user.findUnique({
-      where: { email: coordEmail },
+    // Crear directora académica
+    const directoraEmail = "directora@bellydance.com";
+    const existingDirectora = await prisma.user.findUnique({
+      where: { email: directoraEmail },
     });
-    if (!existingCoord) {
-      const hash = await bcrypt.hash("coordpass", 10);
+    if (!existingDirectora) {
+      const hash = await bcrypt.hash("directorapass", 10);
       await prisma.user.create({
-        data: { email: coordEmail, password: hash, role: "COORDINATOR" },
+        data: { 
+          email: directoraEmail, 
+          password: hash, 
+          role: "DIRECTORA_ACADEMICA",
+          nombre: "Directora",
+          apellido: "Académica",
+          cedula: "12345678",
+          fechaNacimiento: new Date("1985-05-15"),
+          edad: 39
+        },
       });
-      console.log(`Created coordinator user: ${coordEmail}`);
+      console.log(`Created directora académica user: ${directoraEmail}`);
     }
 
-    // Crear instructor
-    const instructorEmail = "instructor@bellydance.com";
-    let instructor = await prisma.user.findUnique({
-      where: { email: instructorEmail },
-    });
-    if (!instructor) {
-      const hash = await bcrypt.hash("instructorpass", 10);
-      instructor = await prisma.user.create({
-        data: { email: instructorEmail, password: hash, role: "INSTRUCTOR" },
+    // Crear profesoras: Mariana, Veronica, Isabella
+    const profesoras = [
+      { nombre: "Mariana", apellido: "Rodríguez", email: "mariana@bellydance.com", cedula: "10000001" },
+      { nombre: "Veronica", apellido: "Sánchez", email: "veronica@bellydance.com", cedula: "10000002" },
+      { nombre: "Isabella", apellido: "Martínez", email: "isabella@bellydance.com", cedula: "10000003" }
+    ];
+
+    let profesora = null;
+    for (const p of profesoras) {
+      const existingProfesora = await prisma.user.findUnique({
+        where: { email: p.email },
       });
-      console.log(`Created instructor user: ${instructorEmail}`);
+      if (!existingProfesora) {
+        const hash = await bcrypt.hash("profesorapass", 10);
+        profesora = await prisma.user.create({
+          data: { 
+            email: p.email, 
+            password: hash, 
+            role: "PROFESORA",
+            nombre: p.nombre,
+            apellido: p.apellido,
+            cedula: p.cedula,
+            fechaNacimiento: new Date("1990-03-20"),
+            edad: 34
+          },
+        });
+        console.log(`Created profesora user: ${p.email}`);
+      } else {
+        profesora = existingProfesora;
+      }
     }
 
     // Crear clase de ejemplo
@@ -59,7 +96,7 @@ async function run() {
         data: {
           name: "Bellydance Básico",
           description: "Clase introductoria al bellydance",
-          instructorId: instructor.id,
+          instructorId: profesora.id,
         },
       });
       console.log(`Created class: ${danceClass.name}`);
@@ -77,31 +114,40 @@ async function run() {
       console.log("Created schedule for the class");
     }
 
-    // Crear estudiante de ejemplo
-    const studentEmail = "student@bellydance.com";
-    const existingStudent = await prisma.user.findUnique({
-      where: { email: studentEmail },
+    // Crear alumna de ejemplo
+    const alumnaEmail = "alumna@bellydance.com";
+    const existingAlumna = await prisma.user.findUnique({
+      where: { email: alumnaEmail },
     });
-    if (!existingStudent) {
-      const hash = await bcrypt.hash("studentpass", 10);
-      const student = await prisma.user.create({
-        data: { email: studentEmail, password: hash, role: "STUDENT" },
+    if (!existingAlumna) {
+      const hash = await bcrypt.hash("alumnapass", 10);
+      const alumna = await prisma.user.create({
+        data: { 
+          email: alumnaEmail, 
+          password: hash, 
+          role: "ALUMNA",
+          nombre: "Laura",
+          apellido: "Martínez",
+          cedula: "11223344",
+          fechaNacimiento: new Date("2000-08-10"),
+          edad: 24
+        },
       });
-      console.log(`Created student user: ${studentEmail}`);
+      console.log(`Created alumna user: ${alumnaEmail}`);
 
-      // Inscribir al estudiante en la clase
+      // Inscribir a la alumna en la clase
       const danceClass = await prisma.class.findFirst({
         where: { name: "Bellydance Básico" },
       });
       if (danceClass) {
         await prisma.enrollment.create({
           data: {
-            studentId: student.id,
+            studentId: alumna.id,
             classId: danceClass.id,
             status: "APPROVED",
           },
         });
-        console.log("Enrolled student in the class");
+        console.log("Enrolled alumna in the class");
       }
     }
 

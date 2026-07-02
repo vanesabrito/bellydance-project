@@ -8,14 +8,34 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      Role     @default(STUDENT)
-  enrollments Enrollment[]
+  id              String   @id @default(cuid())
+  email           String   @unique
+  password        String
+  role            Role     @default(ALUMNA)
+  nombre          String?
+  apellido        String?
+  cedula          String?
+  fechaNacimiento DateTime?
+  edad            Int?
+  direccion       String?
+  fotoPerfil      String?
+  resetToken      String?  @unique
+  resetTokenExpires DateTime?
+  enrollments     Enrollment[]
   reviewedEnrollments Enrollment[] @relation("ReviewedBy")
-  taughtClasses Class[] @relation("TaughtBy")
-  createdAt DateTime @default(now())
+  taughtClasses   Class[] @relation("TaughtBy")
+  attendances     Attendance[]
+  evaluations     Evaluation[]
+  payments        Payment[]
+  costumes        Costume[] @relation("CostumeInstructor")
+  choreographies  Choreography[] @relation("ChoreographyInstructor")
+  choreographyParticipations ChoreographyParticipant[]
+  documents       Document[]
+  registeredDocuments Document[] @relation("RegisteredDocuments")
+  classSchedules  ClassSchedule[] @relation("ClassScheduleInstructor")
+  createdAt       DateTime @default(now())
+
+  @@unique([cedula], name: "User_cedula_key")
 }
 
 model Class {
@@ -24,8 +44,17 @@ model Class {
   description String?
   instructor  User       @relation("TaughtBy", fields: [instructorId], references: [id])
   instructorId String
+  supportMaterial String? // JSON string with URLs for videos, music, documents
+  warmupExercises String? // Ejercicios de precalentamiento
+  danceRoutineDescription String? // Descripción de la rutina de baile
+  danceTechniqueDescription String? // Descripción de la técnica de baile
+  technique   String?    // Técnica del movimiento trabajado en la clase (legacy)
+  topic       String?    // Tema desarrollado en la clase (legacy)
+  observations String?  // Observaciones de la clase (legacy)
   schedules   Schedule[]
   enrollments Enrollment[]
+  attendances Attendance[]
+  evaluations Evaluation[]
   createdAt   DateTime   @default(now())
 }
 
@@ -48,6 +77,8 @@ model Enrollment {
   classId        String
   enrollmentDate DateTime @default(now())
   status         EnrollmentStatus @default(PENDING)
+  academicLevel  AcademicLevel?
+  ageCategory    AgeCategory?
   // Review workflow fields
   reviewNote     String?
   reviewedAt     DateTime?
@@ -56,11 +87,149 @@ model Enrollment {
   createdAt      DateTime @default(now())
 }
 
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  eventDate   DateTime
+  location    String?
+  createdAt   DateTime @default(now())
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  student     User     @relation(fields: [studentId], references: [id])
+  studentId   String
+  class       Class    @relation(fields: [classId], references: [id])
+  classId     String
+  date        DateTime @default(now())
+  present     Boolean  @default(false)
+  note        String?
+  observations String? // Detailed observations for the student
+  createdAt   DateTime @default(now())
+}
+
+model Evaluation {
+  id          String   @id @default(cuid())
+  student     User     @relation(fields: [studentId], references: [id])
+  studentId   String
+  class       Class    @relation(fields: [classId], references: [id])
+  classId     String
+  date        DateTime @default(now())
+  score       Float?   // Score out of 10
+  comments    String?  // Comments on performance
+  progress    String?  // Progress notes
+  createdAt   DateTime @default(now())
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  student         User     @relation(fields: [studentId], references: [id])
+  studentId       String
+  paymentDate     DateTime @default(now())
+  amount          Float
+  paymentType     PaymentType
+  referenceNumber String?
+  bank            String?
+  receipt         PaymentReceipt?
+  createdAt       DateTime @default(now())
+}
+
+model PaymentReceipt {
+  id             String   @id @default(cuid())
+  receiptNumber  String   @unique
+  payment        Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId      String   @unique
+  issueDate      DateTime @default(now())
+  status         String   @default("PAGADO")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Document {
+  id              String   @id @default(cuid())
+  student         User     @relation(fields: [studentId], references: [id])
+  studentId       String
+  type            DocumentType
+  description     String?
+  fileUrl         String?
+  receivedDate    DateTime @default(now())
+  deliveryDate    DateTime?
+  status          DocumentStatus
+  observations    String?
+  registeredBy    User     @relation("RegisteredDocuments", fields: [registeredById], references: [id])
+  registeredById  String
+  paymentId       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Costume {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  color       String?
+  imageUrl    String?
+  accessories String?
+  estimatedCost Float?
+  status      CostumeStatus @default(DESIGN)
+  instructor  User         @relation("CostumeInstructor", fields: [instructorId], references: [id])
+  instructorId String
+  choreography Choreography? @relation(fields: [choreographyId], references: [id])
+  choreographyId String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Choreography {
+  id          String                      @id @default(cuid())
+  name        String
+  description String?
+  level       String?
+  music       String?
+  videoUrl    String?
+  duration    Int?                        // in minutes
+  status      ChoreographyStatus          @default(PRACTICE)
+  instructor  User                        @relation("ChoreographyInstructor", fields: [instructorId], references: [id])
+  instructorId String
+  costumes    Costume[]
+  participants ChoreographyParticipant[]
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+}
+
+model ChoreographyParticipant {
+  id             String       @id @default(cuid())
+  choreography   Choreography @relation(fields: [choreographyId], references: [id], onDelete: Cascade)
+  choreographyId String
+  student        User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId      String
+  createdAt      DateTime     @default(now())
+
+  @@unique([choreographyId, studentId])
+}
+
+model ClassSchedule {
+  id          String      @id @default(cuid())
+  category    AgeCategory
+  month       Month
+  day         DayOfWeek
+  time        String      // HH:MM format
+  classroom   String
+  instructor  User        @relation("ClassScheduleInstructor", fields: [instructorId], references: [id])
+  instructorId String
+  academicLevel AcademicLevel?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([instructorId, day, time], name: "Unique_instructor_day_time")
+}
+
 enum Role {
   ADMIN
-  COORDINATOR
-  INSTRUCTOR
-  STUDENT
+  DIRECTORA_ACADEMICA
+  PROFESORA
+  ALUMNA
 }
 
 enum EnrollmentStatus {
@@ -77,4 +246,69 @@ enum DayOfWeek {
   FRIDAY
   SATURDAY
   SUNDAY
+}
+
+enum PaymentType {
+  EFECTIVO
+  PAGO_MOVIL
+  TRANSFERENCIA
+}
+
+enum CostumeStatus {
+  DESIGN
+  APPROVED
+  REJECTED
+  IN_PRODUCTION
+  COMPLETED
+}
+
+enum ChoreographyStatus {
+  PRACTICE
+  DEVELOPMENT
+  READY_FOR_PRESENTATION
+}
+
+enum AcademicLevel {
+  BASICO
+  INTERMEDIO
+  AVANZADO
+}
+
+enum AgeCategory {
+  MINI_BELLYDANCE
+  BELLYDANCE_ADOLESCENTES
+  BELLYDANCE_ADULTAS
+}
+
+enum Month {
+  ENERO
+  FEBRERO
+  MARZO
+  ABRIL
+  MAYO
+  JUNIO
+  JULIO
+  AGOSTO
+  SEPTIEMBRE
+  OCTUBRE
+  NOVIEMBRE
+  DICIEMBRE
+}
+
+enum DocumentType {
+  PLANILLA_INSCRIPCION
+  CEDULA_IDENTIDAD
+  FOTO_CARNET
+  CONSTANCIA_INSCRIPCION
+  RECIBO_PAGO
+  CERTIFICADO
+  OTRO
+}
+
+enum DocumentStatus {
+  RECIBIDO
+  EN_REVISION
+  APROBADO
+  RECHAZADO
+  ENTREGADO
 }

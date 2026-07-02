@@ -19,11 +19,39 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
+import SchoolIcon from "@mui/icons-material/School";
+import EventIcon from "@mui/icons-material/Event";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import CheckroomIcon from "@mui/icons-material/Checkroom";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 
 export default function Sidebar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const role = (session as any)?.user?.role ?? "GUEST";
+
+  const getUserName = () => {
+    const user = (session as any)?.user;
+    if (!user) return "Mi Perfil";
+    
+    // Para administrador, mostrar solo "Administrador"
+    if (role === "ADMIN") {
+      return "Administrador";
+    }
+    
+    const nombre = user.nombre;
+    const apellido = user.apellido;
+    
+    if (nombre && apellido) {
+      return `${nombre} ${apellido}`;
+    } else if (nombre) {
+      return nombre;
+    } else {
+      return "Mi Perfil";
+    }
+  };
 
   const isSelected = (href: string) => {
     if (!pathname) return false;
@@ -45,23 +73,6 @@ export default function Sidebar() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box
-        sx={{
-          mb: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Image
-          src="/logo-bellydance-project.png"
-          alt="Logo Bellydance Project"
-          width={200}
-          height={200}
-          priority
-          style={{ objectFit: "contain", width: "200px", height: "200px" }}
-        />
-      </Box>
       <List>
         {/* Dashboard - visible when session exists */}
         {session && (
@@ -76,13 +87,13 @@ export default function Sidebar() {
               <ListItemIcon>
                 <DashboardIcon />
               </ListItemIcon>
-              <ListItemText primary="Dashboard" />
+              <ListItemText primary={getUserName()} />
             </ListItemButton>
           </ListItem>
         )}
 
-        {/* Student links */}
-        {role === "STUDENT" && (
+        {/* Alumna links */}
+        {role === "ALUMNA" && (
           <>
             <ListItem disablePadding>
               <ListItemButton
@@ -95,7 +106,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <UploadFileIcon />
                 </ListItemIcon>
-                <ListItemText primary="Inscribirse" />
+                <ListItemText primary="Solicitar Inscripción" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -112,11 +123,205 @@ export default function Sidebar() {
                 <ListItemText primary="Mis inscripciones" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/registration-form"
+                selected={isSelected("/student/registration-form")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <DescriptionIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Planilla de Inscripción" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/classes"
+                selected={isSelected("/student/classes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Ver Clases" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/choreographies"
+                selected={isSelected("/student/choreographies")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <MusicNoteIcon />
+                </ListItemIcon>
+                <ListItemText primary="Ver Coreografías" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/student/costumes"
+                selected={isSelected("/student/costumes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <CheckroomIcon />
+                </ListItemIcon>
+                <ListItemText primary="Ver Vestuarios" />
+              </ListItemButton>
+            </ListItem>
           </>
         )}
 
-        {/* Coordinator/Admin / Coordinator links */}
-        {(role === "ADMIN" || role === "COORDINATOR") && (
+        {/* Profesora links */}
+        {role === "PROFESORA" && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/manage-classes"
+                selected={isSelected("/profesora/manage-classes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Contenido de Clases" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/choreographies"
+                selected={isSelected("/profesora/choreographies")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <MusicNoteIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Coreografías" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/costumes"
+                selected={isSelected("/profesora/costumes")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <CheckroomIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Vestuarios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/instructor/schedules"
+                selected={isSelected("/instructor/schedules")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <ScheduleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Visualizar Horarios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/profesora/view-students"
+                selected={isSelected("/profesora/view-students")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Buscar Lista de Alumnas por Categorías" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {/* Directora Académica links */}
+        {role === "DIRECTORA_ACADEMICA" && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/events"
+                selected={isSelected("/directora/events")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <EventIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Eventos" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/attendance"
+                selected={isSelected("/directora/attendance")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <FactCheckIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Asistencias" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/schedules"
+                selected={isSelected("/directora/schedules")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <ScheduleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Visualizar Horarios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/directora/view-students"
+                selected={isSelected("/directora/view-students")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Buscar Lista de Alumnas por Categorías" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {/* Admin links */}
+        {role === "ADMIN" && (
           <>
             <ListItem disablePadding>
               <ListItemButton
@@ -129,7 +334,7 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary="Usuarios" />
+                <ListItemText primary="Gestionar Usuarios" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -143,7 +348,63 @@ export default function Sidebar() {
                 <ListItemIcon>
                   <FactCheckIcon />
                 </ListItemIcon>
-                <ListItemText primary="Revisar inscripciones" />
+                <ListItemText primary="Gestionar Inscripciones" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/enrolled-students"
+                selected={isSelected("/admin/enrolled-students")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <SchoolIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Lista de Alumnas por Categorias" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/schedules"
+                selected={isSelected("/admin/schedules")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <ScheduleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Horarios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/documents"
+                selected={isSelected("/admin/documents")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <DescriptionIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Documentos" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                component={Link}
+                href="/admin/payments"
+                selected={isSelected("/admin/payments")}
+                disableRipple
+                sx={itemSx}
+              >
+                <ListItemIcon>
+                  <AttachMoneyIcon />
+                </ListItemIcon>
+                <ListItemText primary="Gestionar Pagos" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
