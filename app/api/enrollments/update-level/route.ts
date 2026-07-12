@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user?.role !== "ADMIN")
+  if (session.user?.role !== "ADMINISTRADOR")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -37,10 +37,14 @@ export async function POST(req: Request) {
       include: {
         student: {
           select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
+            user: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
           },
         },
         class: {

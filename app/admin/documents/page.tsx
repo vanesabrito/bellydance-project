@@ -9,7 +9,7 @@ import DocumentManagement from "@/components/admin/documents/DocumentManagement"
 export default async function AdminDocumentsPage() {
   const session: any = await getServerSession(authOptions as any);
   if (!session) redirect("/login");
-  if (session.user?.role !== "ADMIN") redirect("/dashboard");
+  if (session.user?.role !== "ADMINISTRADOR") redirect("/dashboard");
 
   return (
     <Container maxWidth="lg" sx={{ mt: 8 }}>

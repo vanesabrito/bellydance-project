@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -19,10 +19,14 @@ export async function GET() {
       include: {
         student: {
           select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
+            user: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
           },
         },
         receipt: true,
@@ -45,7 +49,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -74,10 +78,14 @@ export async function PUT(req: NextRequest) {
       include: {
         student: {
           select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
+            user: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
           },
         },
         receipt: true,
@@ -90,6 +98,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Error al actualizar pago" }, { status: 500 });
   }
 }
+
 export async function POST(req: NextRequest) {
   try {
     const session: any = await getServerSession(authOptions as any);
@@ -97,7 +106,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 

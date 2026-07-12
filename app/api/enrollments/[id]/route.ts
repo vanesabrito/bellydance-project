@@ -20,7 +20,7 @@ export async function PATCH(
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user?.role !== "ADMIN")
+  if (session.user?.role !== "ADMINISTRADOR")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const id = params.id;
@@ -33,16 +33,21 @@ export async function PATCH(
 
   try {
     // Get the enrollment with student data
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { id },
-      include: {
-        student: {
+    // Get the enrollment with student data
+const enrollment = await prisma.enrollment.findUnique({
+  where: { id },
+  include: {
+    student: {
+      select: {
+        user: {
           select: {
             edad: true,
           },
         },
       },
-    });
+    },
+  },
+});
 
     if (!enrollment) {
       return NextResponse.json({ error: "Enrollment not found" }, { status: 404 });
@@ -51,7 +56,7 @@ export async function PATCH(
     // Calculate age category automatically when approving
     let ageCategory = enrollment.ageCategory;
     if (status === "APPROVED" && !ageCategory) {
-      ageCategory = calculateAgeCategory(enrollment.student.edad) as any;
+      ageCategory = calculateAgeCategory(enrollment.student.user.edad) as any;
     }
 
     const updated = await prisma.enrollment.update({

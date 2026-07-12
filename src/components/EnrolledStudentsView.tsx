@@ -33,11 +33,13 @@ interface Enrollment {
   academicLevel: string | null;
   ageCategory: string | null;
   student: {
-    id: string;
-    nombre: string | null;
-    apellido: string | null;
-    edad: number | null;
-    email: string | null;
+    user: {
+      id: string;
+      nombre: string | null;
+      apellido: string | null;
+      edad: number | null;
+      email: string | null;
+    };
   };
   class: {
     id: string;
@@ -218,10 +220,10 @@ export default function EnrolledStudentsView({ readOnly = false }: EnrolledStude
             {students.map((enrollment) => (
               <TableRow key={enrollment.id}>
                 <TableCell>
-                  {enrollment.student.nombre} {enrollment.student.apellido}
+                  {enrollment.student.user.nombre} {enrollment.student.user.apellido}
                 </TableCell>
-                <TableCell>{enrollment.student.email}</TableCell>
-                <TableCell>{enrollment.student.edad || "-"}</TableCell>
+                <TableCell>{enrollment.student.user.email}</TableCell>
+                <TableCell>{enrollment.student.user.edad || "-"}</TableCell>
                 <TableCell>{enrollment.class.name}</TableCell>
                 <TableCell>
                   <Chip
@@ -480,7 +482,7 @@ export default function EnrolledStudentsView({ readOnly = false }: EnrolledStude
             {selectedEnrollment && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2" sx={{ mb: 2 }}>
-                  Alumna: {selectedEnrollment.student.nombre} {selectedEnrollment.student.apellido}
+                  Alumna: {selectedEnrollment.student.user.nombre} {selectedEnrollment.student.user.apellido}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 2 }}>
                   Nivel actual: {getLevelLabel(selectedEnrollment.academicLevel)}

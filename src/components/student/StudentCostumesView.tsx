@@ -22,8 +22,10 @@ interface Costume {
   status: string;
   choreography: { id: string; name: string } | null;
   instructor: {
-    nombre: string | null;
-    apellido: string | null;
+    user: {
+      nombre: string | null;
+      apellido: string | null;
+    };
   };
   createdAt: string;
 }
@@ -108,7 +110,7 @@ export default function StudentCostumesView() {
               {selectedCostume.name}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-              Profesora: {selectedCostume.instructor.nombre} {selectedCostume.instructor.apellido}
+              Profesora: {selectedCostume.instructor.user.nombre} {selectedCostume.instructor.user.apellido}
             </Typography>
             
             {selectedCostume.description && (
@@ -240,7 +242,7 @@ export default function StudentCostumesView() {
                   {costume.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Profesora: {costume.instructor.nombre} {costume.instructor.apellido}
+                  Profesora: {costume.instructor.user.nombre} {costume.instructor.user.apellido}
                 </Typography>
                 {costume.choreography && (
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

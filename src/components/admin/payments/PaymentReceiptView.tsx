@@ -24,8 +24,10 @@ interface PaymentReceiptViewProps {
       bank: string | null;
       referenceNumber: string | null;
       student: {
-        nombre: string;
-        apellido: string;
+        user: {
+          nombre: string;
+          apellido: string;
+        };
       };
     };
   };
@@ -101,7 +103,7 @@ export default function PaymentReceiptView({ open, onClose, receipt }: PaymentRe
               Alumna:
             </Typography>
             <Typography variant="body1">
-              {receipt.payment.student.nombre} {receipt.payment.student.apellido}
+              {receipt.payment.student.user.nombre} {receipt.payment.student.user.apellido}
             </Typography>
           </Box>
 

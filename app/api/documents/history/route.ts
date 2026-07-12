@@ -52,8 +52,12 @@ export async function GET(req: NextRequest) {
       include: {
         student: {
           select: {
-            nombre: true,
-            apellido: true,
+            user: {
+              select: {
+                nombre: true,
+                apellido: true,
+              },
+            },
           },
         },
         registeredBy: {
@@ -71,7 +75,7 @@ export async function GET(req: NextRequest) {
     // Formatear la respuesta
     const formattedDocuments = documents.map((doc) => ({
       id: doc.id,
-      studentName: `${doc.student.nombre} ${doc.student.apellido}`,
+      studentName: `${doc.student.user.nombre} ${doc.student.user.apellido}`,
       type: doc.type,
       description: doc.description,
       receivedDate: doc.receivedDate,

@@ -12,7 +12,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -30,8 +30,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ ok: false, error: "Coreografía no encontrada" }, { status: 404 });
     }
 
-    if (session.user?.role === "PROFESORA" && choreography.instructorId !== session.user.id) {
-      return NextResponse.json({ ok: false, error: "No tienes permiso para editar esta coreografía" }, { status: 403 });
+    if (session.user?.role === "PROFESORA") {
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora && choreography.instructorId !== profesora.id) {
+        return NextResponse.json({ ok: false, error: "No tienes permiso para editar esta coreografía" }, { status: 403 });
+      }
     }
 
     // Eliminar participantes existentes
@@ -65,9 +70,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
           include: {
             student: {
               select: {
-                id: true,
-                nombre: true,
-                apellido: true,
+                user: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                  },
+                },
               },
             },
           },
@@ -91,7 +100,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -103,8 +112,13 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ ok: false, error: "Coreografía no encontrada" }, { status: 404 });
     }
 
-    if (session.user?.role === "PROFESORA" && choreography.instructorId !== session.user.id) {
-      return NextResponse.json({ ok: false, error: "No tienes permiso para eliminar esta coreografía" }, { status: 403 });
+    if (session.user?.role === "PROFESORA") {
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora && choreography.instructorId !== profesora.id) {
+        return NextResponse.json({ ok: false, error: "No tienes permiso para eliminar esta coreografía" }, { status: 403 });
+      }
     }
 
     await prisma.choreography.delete({

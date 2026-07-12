@@ -28,9 +28,11 @@ interface ClassSchedule {
   classroom: string;
   instructor: {
     id: string;
-    nombre: string | null;
-    apellido: string | null;
-    email: string | null;
+    user: {
+      nombre: string | null;
+      apellido: string | null;
+      email: string | null;
+    };
   };
   createdAt: string;
   updatedAt: string;
@@ -38,9 +40,11 @@ interface ClassSchedule {
 
 interface Instructor {
   id: string;
-  nombre: string | null;
-  apellido: string | null;
-  email: string | null;
+  user: {
+    nombre: string | null;
+    apellido: string | null;
+    email: string | null;
+  };
 }
 
 const CATEGORY_LABELS = {
@@ -173,7 +177,7 @@ export default function DirectoraScheduleView() {
               <MenuItem value="">Todas las profesoras</MenuItem>
               {instructors.map((instructor) => (
                 <MenuItem key={instructor.id} value={instructor.id}>
-                  {instructor.nombre} {instructor.apellido}
+                  {instructor.user.nombre} {instructor.user.apellido}
                 </MenuItem>
               ))}
             </Select>
@@ -290,7 +294,7 @@ export default function DirectoraScheduleView() {
                     <TableCell>{schedule.time}</TableCell>
                     <TableCell>{schedule.classroom}</TableCell>
                     <TableCell>
-                      {schedule.instructor.nombre} {schedule.instructor.apellido}
+                      {schedule.instructor.user.nombre} {schedule.instructor.user.apellido}
                     </TableCell>
                   </TableRow>
                 ))

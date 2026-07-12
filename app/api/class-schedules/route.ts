@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       if (instructorId && instructorId !== session.user.id) {
         return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
       }
-    } else if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA") {
+    } else if (session.user?.role !== "ADMINISTRADOR" && session.user?.role !== "DIRECTORA_ACADEMICA") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -36,9 +36,13 @@ export async function GET(req: NextRequest) {
         instructor: {
           select: {
             id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
+            user: {
+              select: {
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
           },
         },
       },
@@ -60,7 +64,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -75,13 +79,14 @@ export async function POST(req: NextRequest) {
     // Validar que la profesora exista y esté activa
     const instructor = await prisma.user.findUnique({
       where: { id: instructorId },
+      include: { role: true },
     });
 
     if (!instructor) {
       return NextResponse.json({ ok: false, error: "La profesora no existe" }, { status: 404 });
     }
 
-    if (instructor.role !== "PROFESORA") {
+    if (instructor.role.nombre !== "PROFESORA") {
       return NextResponse.json({ ok: false, error: "El usuario seleccionado no es una profesora" }, { status: 400 });
     }
 
@@ -115,9 +120,13 @@ export async function POST(req: NextRequest) {
         instructor: {
           select: {
             id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
+            user: {
+              select: {
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
           },
         },
       },
@@ -138,7 +147,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -157,13 +166,14 @@ export async function PUT(req: NextRequest) {
     // Validar que la profesora exista y esté activa
     const instructor = await prisma.user.findUnique({
       where: { id: instructorId },
+      include: { role: true },
     });
 
     if (!instructor) {
       return NextResponse.json({ ok: false, error: "La profesora no existe" }, { status: 404 });
     }
 
-    if (instructor.role !== "PROFESORA") {
+    if (instructor.role.nombre !== "PROFESORA") {
       return NextResponse.json({ ok: false, error: "El usuario seleccionado no es una profesora" }, { status: 400 });
     }
 
@@ -199,9 +209,13 @@ export async function PUT(req: NextRequest) {
         instructor: {
           select: {
             id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
+            user: {
+              select: {
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
           },
         },
       },
@@ -222,7 +236,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 

@@ -32,16 +32,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar que la alumna existe
-    const student = await prisma.user.findUnique({
-      where: { id: studentId },
-    });
+const alumna = await prisma.alumna.findUnique({
+  where: { id: studentId },
+  include: {
+    user: true
+  }
+});
 
-    if (!student) {
-      return NextResponse.json(
-        { error: "Alumna no encontrada." },
-        { status: 404 }
-      );
-    }
+if (!alumna) {
+  return NextResponse.json(
+    { error: "Alumna no encontrada." },
+    { status: 404 }
+  );
+}
 
     // Crear el documento
     const document = await prisma.document.create({

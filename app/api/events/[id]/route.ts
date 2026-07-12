@@ -14,7 +14,7 @@ export async function PUT(
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "DIRECTORA_ACADEMICA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "DIRECTORA_ACADEMICA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -49,7 +49,7 @@ export async function DELETE(
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "DIRECTORA_ACADEMICA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "DIRECTORA_ACADEMICA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 403 });
     }
 

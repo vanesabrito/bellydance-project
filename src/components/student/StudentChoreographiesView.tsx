@@ -21,14 +21,18 @@ interface Choreography {
   duration: number | null;
   status: string;
   instructor: {
-    nombre: string | null;
-    apellido: string | null;
+    user: {
+      nombre: string | null;
+      apellido: string | null;
+    };
   };
   participants: {
     student: {
-      id: string;
-      nombre: string | null;
-      apellido: string | null;
+      user: {
+        id: string;
+        nombre: string | null;
+        apellido: string | null;
+      };
     };
   }[];
   createdAt: string;
@@ -112,7 +116,7 @@ export default function StudentChoreographiesView() {
               {selectedChoreography.name}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-              Profesora: {selectedChoreography.instructor.nombre} {selectedChoreography.instructor.apellido}
+              Profesora: {selectedChoreography.instructor.user.nombre} {selectedChoreography.instructor.user.apellido}
             </Typography>
             
             {selectedChoreography.description && (
@@ -218,7 +222,7 @@ export default function StudentChoreographiesView() {
                 </Typography>
                 <Typography variant="body1">
                   {selectedChoreography.participants
-                    .map((p) => `${p.student.nombre} ${p.student.apellido}`)
+                    .map((p) => `${p.student.user.nombre} ${p.student.user.apellido}`)
                     .join(", ")}
                 </Typography>
               </Box>
@@ -243,7 +247,7 @@ export default function StudentChoreographiesView() {
                   {choreography.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Profesora: {choreography.instructor.nombre} {choreography.instructor.apellido}
+                  Profesora: {choreography.instructor.user.nombre} {choreography.instructor.user.apellido}
                 </Typography>
                 {choreography.level && (
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

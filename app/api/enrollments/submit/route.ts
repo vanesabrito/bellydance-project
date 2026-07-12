@@ -34,12 +34,21 @@ export async function POST(req: Request) {
         { status: 409 }
       );
 
-    const enrollment = await prisma.enrollment.create({
-      data: {
-        studentId: userId,
-        classId,
-      },
-    });
+    // Buscar el registro Alumna correspondiente al userId
+const alumna = await prisma.alumna.findUnique({
+  where: { userId }
+});
+
+if (!alumna) {
+  return NextResponse.json({ error: "Usuario no es una alumna" }, { status: 400 });
+}
+
+const enrollment = await prisma.enrollment.create({
+  data: {
+    studentId: alumna.id,
+    classId,
+  },
+});
 
     revalidatePath("/admin/enrollments");
     revalidatePath("/admin/reports");

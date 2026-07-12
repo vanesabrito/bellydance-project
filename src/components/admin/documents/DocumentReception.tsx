@@ -119,7 +119,7 @@ export default function DocumentReception() {
             <MenuItem value="">Seleccione una alumna</MenuItem>
             {students.map((student) => (
               <MenuItem key={student.id} value={student.id}>
-                {student.nombre} {student.apellido}
+                {student.user.nombre} {student.user.apellido}
               </MenuItem>
             ))}
           </Select>

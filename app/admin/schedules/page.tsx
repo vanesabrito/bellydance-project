@@ -9,7 +9,7 @@ import ScheduleManagement from "@/components/admin/ScheduleManagement";
 export default async function AdminSchedulesPage() {
   const session: any = await getServerSession(authOptions as any);
   if (!session) redirect("/login");
-  if (session.user?.role !== "ADMIN") redirect("/dashboard");
+  if (session.user?.role !== "ADMINISTRADOR") redirect("/dashboard");
 
   return (
     <Container maxWidth="lg" sx={{ mt: 8 }}>

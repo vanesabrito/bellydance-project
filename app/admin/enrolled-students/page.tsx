@@ -5,7 +5,7 @@ import EnrolledStudentsView from "@/components/EnrolledStudentsView";
 export default function AdminEnrolledStudentsPage() {
   const { data: session } = useSession();
 
-  if (!session || ((session as any)?.user?.role !== "ADMIN" && (session as any)?.user?.role !== "DIRECTORA_ACADEMICA")) {
+  if (!session || ((session as any)?.user?.role !== "ADMINISTRADOR" && (session as any)?.user?.role !== "DIRECTORA_ACADEMICA")) {
     return null;
   }
 

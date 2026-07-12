@@ -15,7 +15,7 @@ export async function DELETE(
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -27,8 +27,13 @@ export async function DELETE(
       return NextResponse.json({ ok: false, error: "Clase no encontrada" }, { status: 404 });
     }
 
-    if (session.user?.role === "PROFESORA" && classRecord.instructorId !== session.user.id) {
-      return NextResponse.json({ ok: false, error: "No tienes permiso para eliminar esta clase" }, { status: 403 });
+    if (session.user?.role === "PROFESORA") {
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora && classRecord.instructorId !== profesora.id) {
+        return NextResponse.json({ ok: false, error: "No tienes permiso para eliminar esta clase" }, { status: 403 });
+      }
     }
 
     await prisma.class.delete({

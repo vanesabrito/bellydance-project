@@ -15,21 +15,33 @@ export async function GET(req: Request) {
     let whereClause: any = {};
     
     if (session.user?.role === "PROFESORA") {
-      whereClause.instructorId = session.user.id;
+      // Buscar el registro Profesora correspondiente al userId
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora) {
+        whereClause.instructorId = profesora.id;
+      }
     } else if (session.user?.role === "ALUMNA") {
       // Obtener clases donde la alumna está inscrita y aprobada
-      const enrollments = await prisma.enrollment.findMany({
-        where: {
-          studentId: session.user.id,
-          status: "APPROVED"
-        },
-        select: {
-          classId: true
-        }
+      const alumna = await prisma.alumna.findUnique({
+        where: { userId: session.user.id }
       });
       
-      const classIds = enrollments.map(e => e.classId);
-      whereClause.id = { in: classIds };
+      if (alumna) {
+        const enrollments = await prisma.enrollment.findMany({
+          where: {
+            studentId: alumna.id,
+            status: "APPROVED"
+          },
+          select: {
+            classId: true
+          }
+        });
+        
+        const classIds = enrollments.map(e => e.classId);
+        whereClause.id = { in: classIds };
+      }
     }
 
     const classes = await prisma.class.findMany({
@@ -37,9 +49,13 @@ export async function GET(req: Request) {
       include: {
         instructor: {
           select: {
-            id: true,
-            nombre: true,
-            apellido: true,
+            user: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
           },
         },
         schedules: true,
@@ -47,10 +63,14 @@ export async function GET(req: Request) {
           include: {
             student: {
               select: {
-                id: true,
-                nombre: true,
-                apellido: true,
-                email: true,
+                user: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                  },
+                },
               },
             },
           },
@@ -73,7 +93,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -90,6 +110,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Todos los campos son obligatorios" }, { status: 400 });
     }
 
+    // Buscar el registro Profesora correspondiente al userId
+    const profesora = await prisma.profesora.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!profesora) {
+      return NextResponse.json({ ok: false, error: "Usuario no es una profesora" }, { status: 400 });
+    }
+
     const newClass = await prisma.class.create({
       data: {
         name,
@@ -97,7 +126,7 @@ export async function POST(req: Request) {
         warmupExercises,
         danceRoutineDescription,
         danceTechniqueDescription,
-        instructorId: session.user.id,
+        instructorId: profesora.id,
       },
     });
 
@@ -115,7 +144,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -141,8 +170,13 @@ export async function PUT(req: Request) {
       return NextResponse.json({ ok: false, error: "Clase no encontrada" }, { status: 404 });
     }
 
-    if (session.user?.role === "PROFESORA" && classRecord.instructorId !== session.user.id) {
-      return NextResponse.json({ ok: false, error: "No tienes permiso para editar esta clase" }, { status: 403 });
+    if (session.user?.role === "PROFESORA") {
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora && classRecord.instructorId !== profesora.id) {
+        return NextResponse.json({ ok: false, error: "No tienes permiso para editar esta clase" }, { status: 403 });
+      }
     }
 
     const updateData: any = {};

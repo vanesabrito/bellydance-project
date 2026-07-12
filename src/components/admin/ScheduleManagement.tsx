@@ -35,9 +35,11 @@ interface ClassSchedule {
   classroom: string;
   instructor: {
     id: string;
-    nombre: string | null;
-    apellido: string | null;
-    email: string | null;
+    user: {
+      nombre: string | null;
+      apellido: string | null;
+      email: string | null;
+    };
   };
   createdAt: string;
   updatedAt: string;
@@ -45,9 +47,11 @@ interface ClassSchedule {
 
 interface Instructor {
   id: string;
-  nombre: string | null;
-  apellido: string | null;
-  email: string | null;
+  user: {
+    nombre: string | null;
+    apellido: string | null;
+    email: string | null;
+  };
 }
 
 const CATEGORY_LABELS = {
@@ -378,7 +382,7 @@ export default function ScheduleManagement() {
             <MenuItem value="">Seleccione una profesora</MenuItem>
             {instructors.map((instructor) => (
               <MenuItem key={instructor.id} value={instructor.id}>
-                {instructor.nombre} {instructor.apellido}
+                {instructor.user.nombre} {instructor.user.apellido}
               </MenuItem>
             ))}
           </Select>
@@ -434,7 +438,7 @@ export default function ScheduleManagement() {
                   <TableCell>{schedule.time}</TableCell>
                   <TableCell>{schedule.classroom}</TableCell>
                   <TableCell>
-                    {schedule.instructor.nombre} {schedule.instructor.apellido}
+                    {schedule.instructor.user.nombre} {schedule.instructor.user.apellido}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton onClick={() => handleEdit(schedule)} color="primary">
@@ -460,7 +464,7 @@ export default function ScheduleManagement() {
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
-          ¿Estás seguro de que deseas eliminar el horario de {scheduleToDelete?.instructor.nombre} {scheduleToDelete?.instructor.apellido}?
+          ¿Estás seguro de que deseas eliminar el horario de {scheduleToDelete?.instructor.user.nombre} {scheduleToDelete?.instructor.user.apellido}?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>

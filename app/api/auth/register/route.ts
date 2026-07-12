@@ -26,23 +26,39 @@ export async function POST(req: Request) {
       );
     
     const hash = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: { 
-        email, 
-        password: hash, 
-        role: "ALUMNA",
-        nombre,
-        apellido,
-        cedula,
-        fechaNacimiento: new Date(fechaNacimiento),
-        edad: parseInt(edad),
-        direccion
-      },
-    });
-    return NextResponse.json({
-      ok: true,
-      user: { id: user.id, email: user.email },
-    });
+
+// Buscar el roleId correspondiente a ALUMNA
+const roleRecord = await prisma.role.findUnique({
+  where: { nombre: "ALUMNA" }
+});
+
+if (!roleRecord) {
+  return NextResponse.json({ error: "Role not found" }, { status: 500 });
+}
+
+const user = await prisma.user.create({
+  data: { 
+    email, 
+    password: hash, 
+    roleId: roleRecord.id,
+    nombre,
+    apellido,
+    cedula,
+    fechaNacimiento: new Date(fechaNacimiento),
+    edad: parseInt(edad),
+    direccion
+  },
+});
+
+// Crear entrada en la tabla Alumna
+await prisma.alumna.create({
+  data: { userId: user.id }
+});
+
+return NextResponse.json({
+  ok: true,
+  user: { id: user.id, email: user.email },
+});
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -7,11 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id          String   @id @default(cuid())
+  nombre      String   @unique
+  descripcion String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model User {
   id              String   @id @default(cuid())
   email           String   @unique
   password        String
-  role            Role     @default(ALUMNA)
+  roleId          String
+  role            Role     @relation(fields: [roleId], references: [id])
   nombre          String?
   apellido        String?
   cedula          String?
@@ -21,28 +31,75 @@ model User {
   fotoPerfil      String?
   resetToken      String?  @unique
   resetTokenExpires DateTime?
-  enrollments     Enrollment[]
+  
+  // Relaciones compartidas entre roles
   reviewedEnrollments Enrollment[] @relation("ReviewedBy")
-  taughtClasses   Class[] @relation("TaughtBy")
-  attendances     Attendance[]
-  evaluations     Evaluation[]
-  payments        Payment[]
-  costumes        Costume[] @relation("CostumeInstructor")
-  choreographies  Choreography[] @relation("ChoreographyInstructor")
-  choreographyParticipations ChoreographyParticipant[]
-  documents       Document[]
   registeredDocuments Document[] @relation("RegisteredDocuments")
-  classSchedules  ClassSchedule[] @relation("ClassScheduleInstructor")
+  
+  // Relaciones con tablas de rol (1:1)
+  administrador    Administrador?
+  directoraAcademica DirectoraAcademica?
+  profesora        Profesora?
+  alumna           Alumna?
+  
   createdAt       DateTime @default(now())
 
   @@unique([cedula], name: "User_cedula_key")
+}
+
+model Administrador {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DirectoraAcademica {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profesora {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relaciones específicas de Profesora
+  taughtClasses   Class[] @relation("TaughtBy")
+  costumes        Costume[] @relation("CostumeInstructor")
+  choreographies  Choreography[] @relation("ChoreographyInstructor")
+  classSchedules  ClassSchedule[] @relation("ClassScheduleInstructor")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Alumna {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relaciones específicas de Alumna
+  enrollments     Enrollment[]
+  attendances     Attendance[]
+  evaluations     Evaluation[]
+  payments        Payment[]
+  documents       Document[]
+  choreographyParticipations ChoreographyParticipant[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Class {
   id          String     @id @default(cuid())
   name        String
   description String?
-  instructor  User       @relation("TaughtBy", fields: [instructorId], references: [id])
+  instructor  Profesora  @relation("TaughtBy", fields: [instructorId], references: [id])
   instructorId String
   supportMaterial String? // JSON string with URLs for videos, music, documents
   warmupExercises String? // Ejercicios de precalentamiento
@@ -59,19 +116,19 @@ model Class {
 }
 
 model Schedule {
-  id        String   @id @default(cuid())
-  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
   classId   String
   dayOfWeek DayOfWeek
-  startTime String   // HH:MM format
-  endTime   String   // HH:MM format
+  startTime String
+  endTime   String
   location  String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  class     Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model Enrollment {
   id             String   @id @default(cuid())
-  student        User     @relation(fields: [studentId], references: [id])
+  student        Alumna   @relation(fields: [studentId], references: [id])
   studentId      String
   class          Class    @relation(fields: [classId], references: [id])
   classId        String
@@ -98,7 +155,7 @@ model Event {
 
 model Attendance {
   id          String   @id @default(cuid())
-  student     User     @relation(fields: [studentId], references: [id])
+  student     Alumna   @relation(fields: [studentId], references: [id])
   studentId   String
   class       Class    @relation(fields: [classId], references: [id])
   classId     String
@@ -111,7 +168,7 @@ model Attendance {
 
 model Evaluation {
   id          String   @id @default(cuid())
-  student     User     @relation(fields: [studentId], references: [id])
+  student     Alumna   @relation(fields: [studentId], references: [id])
   studentId   String
   class       Class    @relation(fields: [classId], references: [id])
   classId     String
@@ -124,7 +181,7 @@ model Evaluation {
 
 model Payment {
   id              String   @id @default(cuid())
-  student         User     @relation(fields: [studentId], references: [id])
+  student         Alumna   @relation(fields: [studentId], references: [id])
   studentId       String
   paymentDate     DateTime @default(now())
   amount          Float
@@ -136,19 +193,19 @@ model Payment {
 }
 
 model PaymentReceipt {
-  id             String   @id @default(cuid())
-  receiptNumber  String   @unique
-  payment        Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  paymentId      String   @unique
-  issueDate      DateTime @default(now())
-  status         String   @default("PAGADO")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  receiptNumber String   @unique
+  payment       Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId     String   @unique
+  issueDate     DateTime @default(now())
+  status        String   @default("PAGADO")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Document {
   id              String   @id @default(cuid())
-  student         User     @relation(fields: [studentId], references: [id])
+  student         Alumna   @relation(fields: [studentId], references: [id])
   studentId       String
   type            DocumentType
   description     String?
@@ -173,7 +230,7 @@ model Costume {
   accessories String?
   estimatedCost Float?
   status      CostumeStatus @default(DESIGN)
-  instructor  User         @relation("CostumeInstructor", fields: [instructorId], references: [id])
+  instructor  Profesora    @relation("CostumeInstructor", fields: [instructorId], references: [id])
   instructorId String
   choreography Choreography? @relation(fields: [choreographyId], references: [id])
   choreographyId String?
@@ -190,7 +247,7 @@ model Choreography {
   videoUrl    String?
   duration    Int?                        // in minutes
   status      ChoreographyStatus          @default(PRACTICE)
-  instructor  User                        @relation("ChoreographyInstructor", fields: [instructorId], references: [id])
+  instructor  Profesora                   @relation("ChoreographyInstructor", fields: [instructorId], references: [id])
   instructorId String
   costumes    Costume[]
   participants ChoreographyParticipant[]
@@ -202,7 +259,7 @@ model ChoreographyParticipant {
   id             String       @id @default(cuid())
   choreography   Choreography @relation(fields: [choreographyId], references: [id], onDelete: Cascade)
   choreographyId String
-  student        User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student        Alumna      @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId      String
   createdAt      DateTime     @default(now())
 
@@ -216,20 +273,13 @@ model ClassSchedule {
   day         DayOfWeek
   time        String      // HH:MM format
   classroom   String
-  instructor  User        @relation("ClassScheduleInstructor", fields: [instructorId], references: [id])
+  instructor  Profesora   @relation("ClassScheduleInstructor", fields: [instructorId], references: [id])
   instructorId String
   academicLevel AcademicLevel?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   @@unique([instructorId, day, time], name: "Unique_instructor_day_time")
-}
-
-enum Role {
-  ADMIN
-  DIRECTORA_ACADEMICA
-  PROFESORA
-  ALUMNA
 }
 
 enum EnrollmentStatus {

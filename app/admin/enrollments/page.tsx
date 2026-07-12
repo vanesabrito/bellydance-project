@@ -6,7 +6,7 @@ import ReviewEnrollmentsTable from "@/components/admin/ReviewEnrollmentsTable";
 export default async function AdminEnrollmentsPage() {
   const session: any = await getServerSession(authOptions as any);
   if (!session) redirect("/login");
-  if (session.user?.role !== "ADMIN")
+  if (session.user?.role !== "ADMINISTRADOR")
     redirect("/dashboard");
 
   return <ReviewEnrollmentsTable />;

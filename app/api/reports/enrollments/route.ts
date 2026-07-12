@@ -15,7 +15,7 @@ export async function GET() {
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user?.role !== "ADMIN")
+  if (session.user?.role !== "ADMINISTRADOR")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const enrollments = await prisma.enrollment.findMany({
@@ -26,7 +26,7 @@ export async function GET() {
       createdAt: true,
       reviewedAt: true as any,
       reviewNote: true as any,
-      student: { select: { email: true } },
+      student: { select: { user: { select: { email: true } } } },
       reviewer: { select: { email: true } } as any,
       class: { select: { name: true } },
     },
@@ -47,7 +47,7 @@ export async function GET() {
     [
       d.id,
       d.class?.name ?? "",
-      d.student?.email ?? "",
+      d.student?.user?.email ?? "",
       statusLabel(d.status),
       d.createdAt?.toISOString?.() ?? new Date(d.createdAt).toISOString(),
       d.reviewedAt ? new Date(d.reviewedAt).toISOString() : "",

@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")
+  if (session.user?.role !== "ADMINISTRADOR" && session.user?.role !== "DIRECTORA_ACADEMICA")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -35,11 +35,15 @@ export async function GET(req: Request) {
       include: {
         student: {
           select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            edad: true,
-            email: true,
+            user: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                edad: true,
+                email: true,
+              },
+            },
           },
         },
         class: {

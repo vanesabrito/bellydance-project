@@ -10,18 +10,27 @@ export async function GET() {
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const userId = session.user?.id as string;
-  const enrollments = await prisma.enrollment.findMany({
-    where: { studentId: userId },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      status: true,
-      enrollmentDate: true,
-      reviewNote: true as any,
-      reviewedAt: true as any,
-      class: { select: { name: true } },
-    },
-  });
+  // Buscar el registro Alumna correspondiente al userId
+const alumna = await prisma.alumna.findUnique({
+  where: { userId }
+});
+
+if (!alumna) {
+  return NextResponse.json({ ok: true, enrollments: [] });
+}
+
+const enrollments = await prisma.enrollment.findMany({
+  where: { studentId: alumna.id },
+  orderBy: { createdAt: "desc" },
+  select: {
+    id: true,
+    status: true,
+    enrollmentDate: true,
+    reviewNote: true as any,
+    reviewedAt: true as any,
+    class: { select: { name: true } },
+  },
+});
   const normalized = enrollments.map((enrollment) => ({
     ...enrollment,
     className: enrollment.class?.name ?? "",

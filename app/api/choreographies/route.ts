@@ -15,21 +15,32 @@ export async function GET(req: Request) {
     let whereClause: any = {};
     
     if (session.user?.role === "PROFESORA") {
-      whereClause.instructorId = session.user.id;
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora) {
+        whereClause.instructorId = profesora.id;
+      }
     } else if (session.user?.role === "ALUMNA") {
       // Obtener coreografías donde la alumna es participante
-      const participations = await prisma.choreographyParticipant.findMany({
-        where: {
-          studentId: session.user.id
-        },
-        select: {
-          choreographyId: true
-        }
+      const alumna = await prisma.alumna.findUnique({
+        where: { userId: session.user.id }
       });
       
-      const choreographyIds = participations.map(p => p.choreographyId);
-      whereClause.id = { in: choreographyIds };
-    } else if (session.user?.role !== "ADMIN") {
+      if (alumna) {
+        const participations = await prisma.choreographyParticipant.findMany({
+          where: {
+            studentId: alumna.id
+          },
+          select: {
+            choreographyId: true
+          }
+        });
+        
+        const choreographyIds = participations.map(p => p.choreographyId);
+        whereClause.id = { in: choreographyIds };
+      }
+    } else if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -38,17 +49,25 @@ export async function GET(req: Request) {
       include: {
         instructor: {
           select: {
-            nombre: true,
-            apellido: true,
+            user: {
+              select: {
+                nombre: true,
+                apellido: true,
+              },
+            },
           },
         },
         participants: {
           include: {
             student: {
               select: {
-                id: true,
-                nombre: true,
-                apellido: true,
+                user: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                  },
+                },
               },
             },
           },
@@ -77,7 +96,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -91,6 +110,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "El nombre es requerido" }, { status: 400 });
     }
 
+    const profesora = await prisma.profesora.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!profesora) {
+      return NextResponse.json({ ok: false, error: "Usuario no es una profesora" }, { status: 400 });
+    }
+
     const choreography = await prisma.choreography.create({
       data: {
         name,
@@ -100,7 +127,7 @@ export async function POST(req: Request) {
         videoUrl,
         duration: duration ? parseInt(duration) : null,
         status,
-        instructorId: session.user.id,
+        instructorId: profesora.id,
         participants: participantIds && participantIds.length > 0
           ? {
               create: participantIds.map((studentId: string) => ({
@@ -114,9 +141,13 @@ export async function POST(req: Request) {
           include: {
             student: {
               select: {
-                id: true,
-                nombre: true,
-                apellido: true,
+                user: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                  },
+                },
               },
             },
           },

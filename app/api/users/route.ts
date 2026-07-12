@@ -16,26 +16,81 @@ export async function GET(req: Request) {
   
   // Si se filtra por rol ALUMNA, permitir acceso a DIRECTORA_ACADEMICA y PROFESORA
   if (roleFilter === "ALUMNA") {
-    if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA" && session.user?.role !== "PROFESORA")
+    if (session.user?.role !== "ADMINISTRADOR" && session.user?.role !== "DIRECTORA_ACADEMICA" && session.user?.role !== "PROFESORA")
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   } else if (roleFilter === "PROFESORA") {
-    if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")
+    if (session.user?.role !== "ADMINISTRADOR" && session.user?.role !== "DIRECTORA_ACADEMICA")
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   } else {
-    if (session.user?.role !== "ADMIN")
+    if (session.user?.role !== "ADMINISTRADOR")
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const whereClause = roleFilter ? { role: roleFilter } : {};
-  const selectFields = roleFilter === "ALUMNA" || roleFilter === "PROFESORA"
-    ? { id: true, email: true, role: true, nombre: true, apellido: true, createdAt: true }
-    : { id: true, email: true, role: true, createdAt: true };
+  let users: any[];
 
-  const users = await prisma.user.findMany({
-    where: whereClause,
-    orderBy: { createdAt: "desc" },
-    select: selectFields,
-  } as any);
+  // Si se filtra por rol específico, usar la tabla correspondiente
+  if (roleFilter === "ALUMNA") {
+    const alumnas = await prisma.alumna.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            nombre: true,
+            apellido: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    users = alumnas.map((alumna: any) => ({
+      id: alumna.id,
+      user: alumna.user,
+      role: "ALUMNA",
+      createdAt: alumna.createdAt,
+    }));
+  } else if (roleFilter === "PROFESORA") {
+    const profesoras = await prisma.profesora.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            nombre: true,
+            apellido: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    users = profesoras.map((profesora: any) => ({
+      id: profesora.id,
+      user: profesora.user,
+      role: "PROFESORA",
+      createdAt: profesora.createdAt,
+    }));
+  } else {
+    // Para otros casos o sin filtro, usar la tabla User
+    const whereClause = roleFilter 
+      ? { role: { nombre: roleFilter } }
+      : {};
+    
+    const selectFields = { id: true, email: true, role: { select: { nombre: true } }, createdAt: true };
+
+    const rawUsers = await prisma.user.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+      select: selectFields,
+    } as any);
+
+    // Transformar los datos para mantener compatibilidad con el frontend
+    users = rawUsers.map((user: any) => ({
+      ...user,
+      role: user.role.nombre
+    }));
+  }
 
   return NextResponse.json({ ok: true, users });
 }
@@ -46,7 +101,7 @@ export async function PUT(req: Request) {
     const session: any = await getServerSession(authOptions as any);
     if (!session)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (session.user?.role !== "ADMIN")
+    if (session.user?.role !== "ADMINISTRADOR")
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
@@ -69,9 +124,17 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: "Cédula ya está en uso" }, { status: 409 });
     }
     
+    // Buscar el roleId correspondiente al nombre del rol
+    const roleRecord = await prisma.role.findUnique({
+      where: { nombre: role }
+    });
+    
+    if (!roleRecord)
+      return NextResponse.json({ error: "Rol no válido" }, { status: 400 });
+    
     const updateData: any = {
       email,
-      role,
+      roleId: roleRecord.id,
       nombre: nombre || null,
       apellido: apellido || null,
       cedula: cedula || null,
@@ -88,11 +151,12 @@ export async function PUT(req: Request) {
     const user = await prisma.user.update({
       where: { id },
       data: updateData,
+      include: { role: true }
     });
     
     return NextResponse.json({
       ok: true,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: { id: user.id, email: user.email, role: user.role.nombre },
     });
   } catch (err: any) {
     console.error(err);
@@ -105,7 +169,7 @@ export async function POST(req: Request) {
     const session: any = await getServerSession(authOptions as any);
     if (!session)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (session.user?.role !== "ADMIN")
+    if (session.user?.role !== "ADMINISTRADOR")
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
@@ -130,12 +194,20 @@ export async function POST(req: Request) {
         );
     }
     
+    // Buscar el roleId correspondiente al nombre del rol
+    const roleRecord = await prisma.role.findUnique({
+      where: { nombre: role }
+    });
+    
+    if (!roleRecord)
+      return NextResponse.json({ error: "Rol no válido" }, { status: 400 });
+    
     const hash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { 
         email, 
         password: hash, 
-        role,
+        roleId: roleRecord.id,
         nombre: nombre || null,
         apellido: apellido || null,
         cedula: cedula || null,
@@ -143,10 +215,31 @@ export async function POST(req: Request) {
         edad: edad ? parseInt(edad) : null,
         direccion: direccion || null
       },
+      include: { role: true }
     });
+    
+    // Crear entrada en la tabla de rol específica
+    if (role === "ADMINISTRADOR") {
+      await prisma.administrador.create({
+        data: { userId: user.id }
+      });
+    } else if (role === "DIRECTORA_ACADEMICA") {
+      await prisma.directoraAcademica.create({
+        data: { userId: user.id }
+      });
+    } else if (role === "PROFESORA") {
+      await prisma.profesora.create({
+        data: { userId: user.id }
+      });
+    } else if (role === "ALUMNA") {
+      await prisma.alumna.create({
+        data: { userId: user.id }
+      });
+    }
+    
     return NextResponse.json({
       ok: true,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: { id: user.id, email: user.email, role: user.role.nombre },
     });
   } catch (err: any) {
     console.error(err);
@@ -160,7 +253,7 @@ export async function DELETE(req: Request) {
     const session: any = await getServerSession(authOptions as any);
     if (!session)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (session.user?.role !== "ADMIN")
+    if (session.user?.role !== "ADMINISTRADOR")
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { searchParams } = new URL(req.url);
@@ -172,6 +265,7 @@ export async function DELETE(req: Request) {
     // Verificar si el usuario existe
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      include: { role: true }
     });
     
     if (!user)
@@ -180,15 +274,93 @@ export async function DELETE(req: Request) {
     // Verificar dependencias antes de eliminar
     const dependencies: string[] = [];
 
-    // Verificar inscripciones como estudiante
-    const enrollments = await prisma.enrollment.count({
-      where: { studentId: userId },
-    });
-    if (enrollments > 0) {
-      dependencies.push(`${enrollments} inscripción(es) como estudiante`);
+    // Verificar inscripciones como estudiante (usando tabla Alumna)
+    const alumna = await prisma.alumna.findUnique({ where: { userId } });
+    if (alumna) {
+      const enrollments = await prisma.enrollment.count({
+        where: { studentId: alumna.id },
+      });
+      if (enrollments > 0) {
+        dependencies.push(`${enrollments} inscripción(es) como estudiante`);
+      }
+
+      // Verificar registros de asistencia
+      const attendances = await prisma.attendance.count({
+        where: { studentId: alumna.id },
+      });
+      if (attendances > 0) {
+        dependencies.push(`${attendances} registro(s) de asistencia`);
+      }
+
+      // Verificar evaluaciones
+      const evaluations = await prisma.evaluation.count({
+        where: { studentId: alumna.id },
+      });
+      if (evaluations > 0) {
+        dependencies.push(`${evaluations} evaluación(es)`);
+      }
+
+      // Verificar pagos
+      const payments = await prisma.payment.count({
+        where: { studentId: alumna.id },
+      });
+      if (payments > 0) {
+        dependencies.push(`${payments} pago(s)`);
+      }
+
+      // Verificar participaciones en coreografías
+      const choreographyParticipations = await prisma.choreographyParticipant.count({
+        where: { studentId: alumna.id },
+      });
+      if (choreographyParticipations > 0) {
+        dependencies.push(`${choreographyParticipations} participación(es) en coreografía(s)`);
+      }
+
+      // Verificar documentos como estudiante
+      const documents = await prisma.document.count({
+        where: { studentId: alumna.id },
+      });
+      if (documents > 0) {
+        dependencies.push(`${documents} documento(s)`);
+      }
     }
 
-    // Verificar inscripciones revisadas
+    // Verificar clases como instructor (usando tabla Profesora)
+    const profesora = await prisma.profesora.findUnique({ where: { userId } });
+    if (profesora) {
+      const taughtClasses = await prisma.class.count({
+        where: { instructorId: profesora.id },
+      });
+      if (taughtClasses > 0) {
+        dependencies.push(`${taughtClasses} clase(s) asignada(s) como instructor`);
+      }
+
+      // Verificar vestuarios como instructor
+      const costumes = await prisma.costume.count({
+        where: { instructorId: profesora.id },
+      });
+      if (costumes > 0) {
+        dependencies.push(`${costumes} vestuario(s) asignado(s)`);
+      }
+
+      // Verificar coreografías como instructor
+      const choreographies = await prisma.choreography.count({
+        where: { instructorId: profesora.id },
+      });
+      if (choreographies > 0) {
+        dependencies.push(`${choreographies} coreografía(s) asignada(s)`);
+      }
+
+      // Verificar horarios de clase como instructor
+      const classSchedules = await prisma.classSchedule.count({
+        where: { instructorId: profesora.id },
+      });
+      if (classSchedules > 0) {
+        dependencies.push(`${classSchedules} horario(s) de clase asignado(s)`);
+      }
+    }
+
+    // Verificar inscripciones revisadas (compartido entre roles)
     const reviewedEnrollments = await prisma.enrollment.count({
       where: { reviewerId: userId },
     });
@@ -196,84 +368,12 @@ export async function DELETE(req: Request) {
       dependencies.push(`${reviewedEnrollments} inscripción(es) revisada(s)`);
     }
 
-    // Verificar clases como instructor
-    const taughtClasses = await prisma.class.count({
-      where: { instructorId: userId },
-    });
-    if (taughtClasses > 0) {
-      dependencies.push(`${taughtClasses} clase(s) asignada(s) como instructor`);
-    }
-
-    // Verificar registros de asistencia
-    const attendances = await prisma.attendance.count({
-      where: { studentId: userId },
-    });
-    if (attendances > 0) {
-      dependencies.push(`${attendances} registro(s) de asistencia`);
-    }
-
-    // Verificar evaluaciones
-    const evaluations = await prisma.evaluation.count({
-      where: { studentId: userId },
-    });
-    if (evaluations > 0) {
-      dependencies.push(`${evaluations} evaluación(es)`);
-    }
-
-    // Verificar pagos
-    const payments = await prisma.payment.count({
-      where: { studentId: userId },
-    });
-    if (payments > 0) {
-      dependencies.push(`${payments} pago(s)`);
-    }
-
-    // Verificar vestuarios como instructor
-    const costumes = await prisma.costume.count({
-      where: { instructorId: userId },
-    });
-    if (costumes > 0) {
-      dependencies.push(`${costumes} vestuario(s) asignado(s)`);
-    }
-
-    // Verificar coreografías como instructor
-    const choreographies = await prisma.choreography.count({
-      where: { instructorId: userId },
-    });
-    if (choreographies > 0) {
-      dependencies.push(`${choreographies} coreografía(s) asignada(s)`);
-    }
-
-    // Verificar participaciones en coreografías
-    const choreographyParticipations = await prisma.choreographyParticipant.count({
-      where: { studentId: userId },
-    });
-    if (choreographyParticipations > 0) {
-      dependencies.push(`${choreographyParticipations} participación(es) en coreografía(s)`);
-    }
-
-    // Verificar documentos como estudiante
-    const documents = await prisma.document.count({
-      where: { studentId: userId },
-    });
-    if (documents > 0) {
-      dependencies.push(`${documents} documento(s)`);
-    }
-
-    // Verificar documentos registrados
+    // Verificar documentos registrados (compartido entre roles)
     const registeredDocuments = await prisma.document.count({
       where: { registeredById: userId },
     });
     if (registeredDocuments > 0) {
       dependencies.push(`${registeredDocuments} documento(s) registrado(s)`);
-    }
-
-    // Verificar horarios de clase como instructor
-    const classSchedules = await prisma.classSchedule.count({
-      where: { instructorId: userId },
-    });
-    if (classSchedules > 0) {
-      dependencies.push(`${classSchedules} horario(s) de clase asignado(s)`);
     }
 
     // Si hay dependencias, no permitir eliminar
@@ -284,6 +384,17 @@ export async function DELETE(req: Request) {
         dependencies: dependencies,
         message: "El usuario tiene registros relacionados que impiden su eliminación. Por favor, elimine o reasigne estos registros primero."
       }, { status: 400 });
+    }
+
+    // Eliminar entrada en la tabla de rol específica
+    if (user.role.nombre === "ADMINISTRADOR") {
+      await prisma.administrador.delete({ where: { userId } });
+    } else if (user.role.nombre === "DIRECTORA_ACADEMICA") {
+      await prisma.directoraAcademica.delete({ where: { userId } });
+    } else if (user.role.nombre === "PROFESORA") {
+      await prisma.profesora.delete({ where: { userId } });
+    } else if (user.role.nombre === "ALUMNA") {
+      await prisma.alumna.delete({ where: { userId } });
     }
 
     // Eliminar el usuario

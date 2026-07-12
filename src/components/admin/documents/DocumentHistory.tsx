@@ -183,7 +183,7 @@ export default function DocumentHistory() {
                 <MenuItem value="">Todas</MenuItem>
                 {students.map((student) => (
                   <MenuItem key={student.id} value={student.id}>
-                    {student.nombre} {student.apellido}
+                    {student.user.nombre} {student.user.apellido}
                   </MenuItem>
                 ))}
               </Select>

@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   // Si es profesora, permitir acceso pero filtrar por sus clases
   if (session.user?.role === "PROFESORA") {
     // Profesora puede ver sus propias alumnas
-  } else if (session.user?.role !== "ADMIN" && session.user?.role !== "DIRECTORA_ACADEMICA")
+  } else if (session.user?.role !== "ADMINISTRADOR" && session.user?.role !== "DIRECTORA_ACADEMICA")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -35,18 +35,25 @@ export async function GET(req: Request) {
 
     // Si es profesora, filtrar por sus clases
     if (session.user?.role === "PROFESORA") {
-      where.class = {
-        instructorId: session.user.id,
-      };
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora) {
+        where.class = {
+          instructorId: profesora.id,
+        };
+      }
     }
 
     if (searchTerm) {
       where.student = {
-        OR: [
-          { nombre: { contains: searchTerm, mode: "insensitive" } },
-          { apellido: { contains: searchTerm, mode: "insensitive" } },
-          { email: { contains: searchTerm, mode: "insensitive" } },
-        ],
+        user: {
+          OR: [
+            { nombre: { contains: searchTerm, mode: "insensitive" } },
+            { apellido: { contains: searchTerm, mode: "insensitive" } },
+            { email: { contains: searchTerm, mode: "insensitive" } },
+          ],
+        },
       };
     }
 
@@ -59,11 +66,15 @@ export async function GET(req: Request) {
       include: {
         student: {
           select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            edad: true,
-            email: true,
+            user: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                edad: true,
+                email: true,
+              },
+            },
           },
         },
         class: {
@@ -74,7 +85,7 @@ export async function GET(req: Request) {
         },
       },
       orderBy: [
-        { student: { nombre: "asc" } },
+        { student: { user: { nombre: "asc" } } },
       ],
     });
 
@@ -99,7 +110,7 @@ export async function GET(req: Request) {
 
     enrollments.forEach((enrollment: any) => {
       // Calculate age category if not set
-      const category = enrollment.ageCategory || calculateAgeCategory(enrollment.student.edad);
+      const category = enrollment.ageCategory || calculateAgeCategory(enrollment.student.user.edad);
       // Default to BASICO if academic level is not set
       const level = enrollment.academicLevel || "BASICO";
 

@@ -12,7 +12,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -29,8 +29,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ ok: false, error: "Vestuario no encontrado" }, { status: 404 });
     }
 
-    if (session.user?.role === "PROFESORA" && costume.instructorId !== session.user.id) {
-      return NextResponse.json({ ok: false, error: "No tienes permiso para editar este vestuario" }, { status: 403 });
+    if (session.user?.role === "PROFESORA") {
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora && costume.instructorId !== profesora.id) {
+        return NextResponse.json({ ok: false, error: "No tienes permiso para editar este vestuario" }, { status: 403 });
+      }
     }
 
     const updatedCostume = await prisma.costume.update({
@@ -63,7 +68,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 

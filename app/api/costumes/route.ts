@@ -15,26 +15,37 @@ export async function GET(req: Request) {
     let whereClause: any = {};
     
     if (session.user?.role === "PROFESORA") {
-      whereClause.instructorId = session.user.id;
+      const profesora = await prisma.profesora.findUnique({
+        where: { userId: session.user.id }
+      });
+      if (profesora) {
+        whereClause.instructorId = profesora.id;
+      }
     } else if (session.user?.role === "ALUMNA") {
       // Obtener vestuarios de las profesoras asignadas a través de inscripciones aprobadas
-      const enrollments = await prisma.enrollment.findMany({
-        where: {
-          studentId: session.user.id,
-          status: "APPROVED"
-        },
-        include: {
-          class: {
-            select: {
-              instructorId: true
-            }
-          }
-        }
+      const alumna = await prisma.alumna.findUnique({
+        where: { userId: session.user.id }
       });
       
-      const instructorIds = enrollments.map(e => e.class.instructorId);
-      whereClause.instructorId = { in: instructorIds };
-    } else if (session.user?.role !== "ADMIN") {
+      if (alumna) {
+        const enrollments = await prisma.enrollment.findMany({
+          where: {
+            studentId: alumna.id,
+            status: "APPROVED"
+          },
+          include: {
+            class: {
+              select: {
+                instructorId: true
+              }
+            }
+          }
+        });
+        
+        const instructorIds = enrollments.map(e => e.class.instructorId);
+        whereClause.instructorId = { in: instructorIds };
+      }
+    } else if (session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -43,8 +54,12 @@ export async function GET(req: Request) {
       include: {
         instructor: {
           select: {
-            nombre: true,
-            apellido: true,
+            user: {
+              select: {
+                nombre: true,
+                apellido: true,
+              },
+            },
           },
         },
         choreography: {
@@ -71,7 +86,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
     }
 
-    if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMIN") {
+        if (session.user?.role !== "PROFESORA" && session.user?.role !== "ADMINISTRADOR") {
       return NextResponse.json({ ok: false, error: "Acceso denegado" }, { status: 403 });
     }
 
@@ -84,6 +99,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "El nombre es requerido" }, { status: 400 });
     }
 
+    const profesora = await prisma.profesora.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!profesora) {
+      return NextResponse.json({ ok: false, error: "Usuario no es una profesora" }, { status: 400 });
+    }
+
     const costume = await prisma.costume.create({
       data: {
         name,
@@ -93,7 +116,7 @@ export async function POST(req: Request) {
         accessories,
         estimatedCost,
         choreographyId,
-        instructorId: session.user.id,
+        instructorId: profesora.id,
       },
     });
 

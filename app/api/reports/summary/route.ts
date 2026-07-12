@@ -9,7 +9,7 @@ export async function GET() {
   const session: any = await getServerSession(authOptions as any);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user?.role !== "ADMIN")
+  if (session.user?.role !== "ADMINISTRADOR")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const [
@@ -22,8 +22,8 @@ export async function GET() {
     rejected,
   ] = await Promise.all([
     prisma.user.count(),
-    prisma.user.count({ where: { role: "ADMIN" } }),
-    prisma.user.count({ where: { role: "ALUMNA" } }),
+    prisma.user.count({ where: { role: { nombre: "ADMINISTRADOR" } } }),
+    prisma.user.count({ where: { role: { nombre: "ALUMNA" } } }),
     prisma.enrollment.count(),
     prisma.enrollment.count({ where: { status: "PENDING" } }),
     prisma.enrollment.count({ where: { status: "APPROVED" } }),
@@ -37,7 +37,7 @@ export async function GET() {
       id: true,
       status: true,
       createdAt: true,
-      student: { select: { email: true } },
+      student: { select: { user: { select: { email: true } } } },
       class: { select: { name: true } },
     },
   });
@@ -45,6 +45,7 @@ export async function GET() {
   const recentWithClassName = recent.map((enrollment) => ({
     ...enrollment,
     className: enrollment.class?.name ?? "",
+    studentEmail: enrollment.student?.user?.email ?? "",
   }));
 
   return NextResponse.json({

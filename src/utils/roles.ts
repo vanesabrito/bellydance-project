@@ -1,8 +1,8 @@
-export type AppRole = "ADMIN" | "DIRECTORA_ACADEMICA" | "PROFESORA" | "ALUMNA" | string | null | undefined;
+export type AppRole = "ADMINISTRADOR" | "DIRECTORA_ACADEMICA" | "PROFESORA" | "ALUMNA" | string | null | undefined;
 
 export function roleLabel(role: AppRole): string {
   switch (role) {
-    case "ADMIN":
+    case "ADMINISTRADOR":
       return "Administrador";
     case "DIRECTORA_ACADEMICA":
       return "Directora Académica";
@@ -13,4 +13,9 @@ export function roleLabel(role: AppRole): string {
     default:
       return "Usuario";
   }
+}
+
+// Función auxiliar para obtener el rol de un usuario desde la tabla Role
+export function getUserRole(roleNombre: string | null | undefined): string {
+  return roleNombre || "ALUMNA";
 }

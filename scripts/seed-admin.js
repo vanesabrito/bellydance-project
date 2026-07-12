@@ -9,6 +9,27 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
 async function run() {
   try {
     console.log("Seeding database for Bellydance Project Academy...");
+    console.log("Available Prisma models:", Object.keys(prisma).filter(key => typeof prisma[key] === 'object' && prisma[key] !== null));
+
+    // Crear roles en la tabla Role
+    const roles = [
+      { id: 'role_admin', nombre: 'ADMINISTRADOR', descripcion: 'Rol con acceso total al sistema' },
+      { id: 'role_directora', nombre: 'DIRECTORA_ACADEMICA', descripcion: 'Rol encargado de gestión académica' },
+      { id: 'role_profesora', nombre: 'PROFESORA', descripcion: 'Rol encargado de enseñanza y coreografías' },
+      { id: 'role_alumna', nombre: 'ALUMNA', descripcion: 'Rol de estudiante del sistema' }
+    ];
+
+    for (const role of roles) {
+      const existingRole = await prisma.Role.findUnique({
+        where: { id: role.id },
+      });
+      if (!existingRole) {
+        await prisma.Role.create({
+          data: role,
+        });
+        console.log(`Created role: ${role.nombre}`);
+      }
+    }
 
     // Crear admin
     const existingAdmin = await prisma.user.findUnique({
@@ -16,11 +37,11 @@ async function run() {
     });
     if (!existingAdmin) {
       const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
-      await prisma.user.create({
+      const adminUser = await prisma.user.create({
         data: { 
           email: ADMIN_EMAIL, 
           password: hash, 
-          role: "ADMIN",
+          roleId: 'role_admin',
           nombre: "Administrador",
           apellido: "Sistema",
           cedula: "00000000",
@@ -28,6 +49,14 @@ async function run() {
           edad: 34
         },
       });
+      
+      // Crear entrada en Administrador
+      await prisma.administrador.create({
+        data: {
+          userId: adminUser.id,
+        },
+      });
+      
       console.log(`Created admin user: ${ADMIN_EMAIL}`);
     } else {
       console.log("Admin already exists:", ADMIN_EMAIL);
@@ -40,11 +69,11 @@ async function run() {
     });
     if (!existingDirectora) {
       const hash = await bcrypt.hash("directorapass", 10);
-      await prisma.user.create({
+      const directoraUser = await prisma.user.create({
         data: { 
           email: directoraEmail, 
           password: hash, 
-          role: "DIRECTORA_ACADEMICA",
+          roleId: 'role_directora',
           nombre: "Directora",
           apellido: "Académica",
           cedula: "12345678",
@@ -52,6 +81,14 @@ async function run() {
           edad: 39
         },
       });
+      
+      // Crear entrada en DirectoraAcademica
+      await prisma.directoraAcademica.create({
+        data: {
+          userId: directoraUser.id,
+        },
+      });
+      
       console.log(`Created directora académica user: ${directoraEmail}`);
     }
 
@@ -73,7 +110,7 @@ async function run() {
           data: { 
             email: p.email, 
             password: hash, 
-            role: "PROFESORA",
+            roleId: 'role_profesora',
             nombre: p.nombre,
             apellido: p.apellido,
             cedula: p.cedula,
@@ -81,6 +118,14 @@ async function run() {
             edad: 34
           },
         });
+        
+        // Crear entrada en Profesora
+        await prisma.profesora.create({
+          data: {
+            userId: profesora.id,
+          },
+        });
+        
         console.log(`Created profesora user: ${p.email}`);
       } else {
         profesora = existingProfesora;
@@ -91,12 +136,18 @@ async function run() {
     const existingClass = await prisma.class.findFirst({
       where: { name: "Bellydance Básico" },
     });
+    let danceClass = existingClass;
     if (!existingClass) {
-      const danceClass = await prisma.class.create({
+      // Obtener el ID de Profesora para el instructor
+      const profesoraRecord = await prisma.profesora.findFirst({
+        where: { userId: profesora.id },
+      });
+      
+      danceClass = await prisma.class.create({
         data: {
           name: "Bellydance Básico",
           description: "Clase introductoria al bellydance",
-          instructorId: profesora.id,
+          instructorId: profesoraRecord.id,
         },
       });
       console.log(`Created class: ${danceClass.name}`);
@@ -121,11 +172,11 @@ async function run() {
     });
     if (!existingAlumna) {
       const hash = await bcrypt.hash("alumnapass", 10);
-      const alumna = await prisma.user.create({
+      const alumnaUser = await prisma.user.create({
         data: { 
           email: alumnaEmail, 
           password: hash, 
-          role: "ALUMNA",
+          roleId: 'role_alumna',
           nombre: "Laura",
           apellido: "Martínez",
           cedula: "11223344",
@@ -133,16 +184,21 @@ async function run() {
           edad: 24
         },
       });
+      
+      // Crear entrada en Alumna
+      const alumnaRecord = await prisma.alumna.create({
+        data: {
+          userId: alumnaUser.id,
+        },
+      });
+      
       console.log(`Created alumna user: ${alumnaEmail}`);
 
       // Inscribir a la alumna en la clase
-      const danceClass = await prisma.class.findFirst({
-        where: { name: "Bellydance Básico" },
-      });
       if (danceClass) {
         await prisma.enrollment.create({
           data: {
-            studentId: alumna.id,
+            studentId: alumnaRecord.id,
             classId: danceClass.id,
             status: "APPROVED",
           },

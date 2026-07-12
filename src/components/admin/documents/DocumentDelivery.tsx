@@ -30,8 +30,10 @@ interface PaymentReceipt {
     bank: string | null;
     referenceNumber: string | null;
     student: {
-      nombre: string;
-      apellido: string;
+      user: {
+        nombre: string;
+        apellido: string;
+      };
     };
   };
 }
@@ -199,7 +201,7 @@ export default function DocumentDelivery() {
                 <Card key={receipt.id}>
                   <CardContent>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Recibo de Pago - {receipt.payment.student.nombre} {receipt.payment.student.apellido}
+                      Recibo de Pago - {receipt.payment.student.user.nombre} {receipt.payment.student.user.apellido}
                     </Typography>
                     <Typography variant="body2">N° Recibo: {receipt.receiptNumber}</Typography>
                     <Typography variant="body2">Monto: ${receipt.payment.amount.toFixed(2)}</Typography>
@@ -242,7 +244,7 @@ export default function DocumentDelivery() {
             <MenuItem value="">Seleccione una alumna</MenuItem>
             {students.map((student) => (
               <MenuItem key={student.id} value={student.id}>
-                {student.nombre} {student.apellido}
+                {student.user.nombre} {student.user.apellido}
               </MenuItem>
             ))}
           </Select>
@@ -322,8 +324,10 @@ export default function DocumentDelivery() {
             bank: null,
             referenceNumber: null,
             student: {
-              nombre: "",
-              apellido: "",
+              user: {
+                nombre: "",
+                apellido: "",
+              },
             },
           },
         }}

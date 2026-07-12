@@ -28,10 +28,12 @@ import PaymentReceiptView from "@/components/admin/payments/PaymentReceiptView";
 interface Payment {
   id: string;
   student: {
-    id: string;
-    nombre: string | null;
-    apellido: string | null;
-    email: string;
+    user: {
+      id: string;
+      nombre: string | null;
+      apellido: string | null;
+      email: string;
+    };
   };
   paymentDate: string;
   amount: number;
@@ -49,9 +51,11 @@ interface Payment {
 
 interface Student {
   id: string;
-  nombre: string | null;
-  apellido: string | null;
-  email: string;
+  user: {
+    nombre: string | null;
+    apellido: string | null;
+    email: string;
+  };
 }
 
 export default function AdminPaymentsPage() {
@@ -144,7 +148,7 @@ export default function AdminPaymentsPage() {
     setEditingPayment(payment);
     setFormData({
       id: payment.id,
-      studentId: payment.student.id,
+      studentId: payment.student.user.id,
       paymentDate: payment.paymentDate.split('T')[0],
       amount: payment.amount.toString(),
       paymentType: payment.paymentType,
@@ -169,7 +173,7 @@ export default function AdminPaymentsPage() {
   };
 
   if (!session) return <p>Debes iniciar sesión.</p>;
-  if ((session as any)?.user?.role !== "ADMIN") return <p>No tienes permiso para acceder a esta página.</p>;
+  if ((session as any)?.user?.role !== "ADMINISTRADOR") return <p>No tienes permiso para acceder a esta página.</p>;
 
   return (
     <Container maxWidth="lg" sx={{ mt: 8 }}>
@@ -200,9 +204,9 @@ export default function AdminPaymentsPage() {
             {payments.map((payment) => (
               <TableRow key={payment.id}>
                 <TableCell>
-                  {payment.student.nombre} {payment.student.apellido}
+                  {payment.student.user.nombre} {payment.student.user.apellido}
                   <br />
-                  <small>{payment.student.email}</small>
+                  <small>{payment.student.user.email}</small>
                 </TableCell>
                 <TableCell>{new Date(payment.paymentDate).toLocaleDateString()}</TableCell>
                 <TableCell>${payment.amount.toFixed(2)}</TableCell>
@@ -264,7 +268,7 @@ export default function AdminPaymentsPage() {
               >
                 {students.map((student) => (
                   <MenuItem key={student.id} value={student.id}>
-                    {student.nombre} {student.apellido} - {student.email}
+                    {student.user.nombre} {student.user.apellido} - {student.user.email}
                   </MenuItem>
                 ))}
               </TextField>

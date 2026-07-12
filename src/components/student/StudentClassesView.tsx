@@ -20,8 +20,10 @@ interface Class {
   danceTechniqueDescription: string | null;
   supportMaterial: string | null;
   instructor: {
-    nombre: string | null;
-    apellido: string | null;
+    user: {
+      nombre: string | null;
+      apellido: string | null;
+    };
   };
   schedules: {
     dayOfWeek: string;
@@ -113,7 +115,7 @@ export default function StudentClassesView() {
               {selectedClass.name}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-              Profesora: {selectedClass.instructor.nombre} {selectedClass.instructor.apellido}
+              Profesora: {selectedClass.instructor.user.nombre} {selectedClass.instructor.user.apellido}
             </Typography>
             
             {selectedClass.description && (
@@ -208,7 +210,7 @@ export default function StudentClassesView() {
                   {classItem.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Profesora: {classItem.instructor.nombre} {classItem.instructor.apellido}
+                  Profesora: {classItem.instructor.user.nombre} {classItem.instructor.user.apellido}
                 </Typography>
                 {classItem.description && (
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

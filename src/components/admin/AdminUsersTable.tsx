@@ -31,7 +31,7 @@ import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 type AdminUser = {
   id: string;
   email: string;
-  role: "ADMIN" | "DIRECTORA_ACADEMICA" | "PROFESORA" | "ALUMNA";
+  role: "ADMINISTRADOR" | "DIRECTORA_ACADEMICA" | "PROFESORA" | "ALUMNA";
   createdAt: string;
 };
 
@@ -59,7 +59,7 @@ export default function AdminUsersTable() {
     edad: "",
     direccion: "",
     password: "",
-    role: "ALUMNA" as "ADMIN" | "DIRECTORA_ACADEMICA" | "PROFESORA" | "ALUMNA",
+    role: "ALUMNA" as "ADMINISTRADOR" | "DIRECTORA_ACADEMICA" | "PROFESORA" | "ALUMNA",
   });
 
   const loadUsers = useCallback(async () => {
@@ -265,7 +265,7 @@ export default function AdminUsersTable() {
                   <Chip
                     size="small"
                     label={roleLabel(u.role)}
-                    color={u.role === "ADMIN" ? "primary" : "default"}
+                    color={u.role === "ADMINISTRADOR" ? "primary" : "default"}
                   />
                 </TableCell>
                 <TableCell>{new Date(u.createdAt).toLocaleString()}</TableCell>
@@ -374,7 +374,7 @@ export default function AdminUsersTable() {
                 label="Rol"
                 onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
               >
-                <MenuItem value="ADMIN">Administrador</MenuItem>
+                <MenuItem value="ADMINISTRADOR">Administrador</MenuItem>
                 <MenuItem value="DIRECTORA_ACADEMICA">Directora Académica</MenuItem>
                 <MenuItem value="PROFESORA">Profesora</MenuItem>
                 <MenuItem value="ALUMNA">Alumna</MenuItem>

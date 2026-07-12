@@ -32,11 +32,13 @@ interface Enrollment {
   academicLevel: string | null;
   ageCategory: string | null;
   student: {
-    id: string;
-    nombre: string | null;
-    apellido: string | null;
-    edad: number | null;
-    email: string | null;
+    user: {
+      id: string;
+      nombre: string | null;
+      apellido: string | null;
+      edad: number | null;
+      email: string | null;
+    };
   };
   class: {
     id: string;
@@ -181,13 +183,13 @@ export default function AcademicClassificationPage() {
   const filteredEnrollments = stats?.enrollments.filter((enrollment) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      enrollment.student.nombre?.toLowerCase().includes(searchLower) ||
-      enrollment.student.apellido?.toLowerCase().includes(searchLower) ||
-      enrollment.student.email?.toLowerCase().includes(searchLower)
+      enrollment.student.user.nombre?.toLowerCase().includes(searchLower) ||
+      enrollment.student.user.apellido?.toLowerCase().includes(searchLower) ||
+      enrollment.student.user.email?.toLowerCase().includes(searchLower)
     );
   }) || [];
 
-  if (!session || ((session as any)?.user?.role !== "ADMIN" && (session as any)?.user?.role !== "DIRECTORA_ACADEMICA")) {
+  if (!session || ((session as any)?.user?.role !== "ADMINISTRADOR" && (session as any)?.user?.role !== "DIRECTORA_ACADEMICA")) {
     return null;
   }
 
@@ -400,10 +402,10 @@ export default function AcademicClassificationPage() {
                 {filteredEnrollments.map((enrollment) => (
                   <TableRow key={enrollment.id}>
                     <TableCell>
-                      {enrollment.student.nombre} {enrollment.student.apellido}
+                      {enrollment.student.user.nombre} {enrollment.student.user.apellido}
                     </TableCell>
-                    <TableCell>{enrollment.student.email}</TableCell>
-                    <TableCell>{enrollment.student.edad || "-"}</TableCell>
+                    <TableCell>{enrollment.student.user.email}</TableCell>
+                    <TableCell>{enrollment.student.user.edad || "-"}</TableCell>
                     <TableCell>{enrollment.class.name}</TableCell>
                     <TableCell>
                       <Chip
@@ -446,7 +448,7 @@ export default function AcademicClassificationPage() {
           {selectedEnrollment && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                Alumna: {selectedEnrollment.student.nombre} {selectedEnrollment.student.apellido}
+                Alumna: {selectedEnrollment.student.user.nombre} {selectedEnrollment.student.user.apellido}
               </Typography>
               <FormControl fullWidth>
                 <InputLabel>Nuevo Nivel Académico</InputLabel>

@@ -37,7 +37,7 @@ export default function Sidebar() {
     if (!user) return "Mi Perfil";
     
     // Para administrador, mostrar solo "Administrador"
-    if (role === "ADMIN") {
+    if (role === "ADMINISTRADOR") {
       return "Administrador";
     }
     
@@ -321,7 +321,7 @@ export default function Sidebar() {
         )}
 
         {/* Admin links */}
-        {role === "ADMIN" && (
+        {role === "ADMINISTRADOR" && (
           <>
             <ListItem disablePadding>
               <ListItemButton
